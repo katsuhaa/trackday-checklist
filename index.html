@@ -42,7 +42,7 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
           calc(env(safe-area-inset-left) + 18px);
 }
 
-/* ヘッダー: 進捗バー + N/11 + 最初から */
+/* ヘッダー: 進捗バー + N/10 + 最初から */
 #progressTrack{height:6px;border-radius:3px;background:rgba(102,112,122,.22);overflow:hidden;}
 #progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
 #headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
@@ -96,7 +96,7 @@ body.final #nextStintBtn{display:inline-block;}
   <header>
     <div id="progressTrack"><div id="progressFill"></div></div>
     <div id="headerRow">
-      <div id="counter">1 / 11</div>
+      <div id="counter">1 / 10</div>
       <button id="resetBtn" type="button">最初から</button>
     </div>
   </header>
@@ -129,8 +129,7 @@ const STEPS=[
   {phase:"車の設定", text:"エアコンを最大に設定\n風向を確認"},
   {phase:"車の設定", text:"制御OFFの専用ボタンを押す\nオーディオをOFF", sub:"ABS以外すべてOFF。エンジン音を聞くため"},
   {phase:"装備",     text:"耐火マスクをかぶる\nHANSを装着"},
-  {phase:"装備",     text:"肩ベルト装着"},
-  {phase:"装備",     text:"4点ベルトがHANSにはまっているか確認"},
+  {phase:"装備",     text:"肩ベルトを装着\n4点ベルトがHANSにはまっているか確認"},
   {phase:"装備",     text:"ヘルメットをかぶる\nHANSクリップを装着"},
   {phase:"出発前",   text:"窓ガラスを開ける\n走行券を取り出す"},
   {phase:"出発",     text:"タップでRaceChrono起動\nグローブを装着\n走行券を渡して出発!"}
