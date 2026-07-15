@@ -129,8 +129,8 @@ const STEPS=[
   {phase:"装備",     text:"耐火マスク・HANS装着"},
   {phase:"装備",     text:"肩ベルト装着", sub:"4点ベルトがHANSに掛かっているか確認"},
   {phase:"装備",     text:"ヘルメット・HANSクリップ装着"},
-  {phase:"出発前",   text:"窓を開けて\n走行券を手元に"},
-  {phase:"出発前",   text:"RaceChrono起動\nグローブ装着", sub:"タップでRaceChronoが開く。起動を確認したらグローブ装着"},
+  {phase:"出発前",   text:"窓オープン・走行券準備\nRaceChrono起動", sub:"タップでRaceChronoが開く。起動を確認したらこの画面に戻る", launchRC:true},
+  {phase:"出発前",   text:"グローブ装着", sub:"タップしてからグローブをはめる"},
   {phase:"出発",     text:"走行券を渡して\n出発!"}
 ];
 
@@ -186,10 +186,11 @@ function confirmFx(){
 
 function next(){
   if(i>=STEPS.length-1)return; /* 最終画面はタップでは動かない。リセットは「次のスティントへ」のみ */
+  const launch=STEPS[i].launchRC; /* launchRC付きステップの確認タップでRaceChronoを起動 */
   i++;
   confirmFx();
   render(true);
-  if(i===STEPS.length-1)openRaceChrono(); /* 10の確認タップ(素手での最後のタップ)で11「出発!」に進むと同時にRaceChronoを起動 */
+  if(launch)openRaceChrono();
 }
 function prev(){if(i>0){i--;render(true);}}
 function resetAll(){i=0;render(true);}
