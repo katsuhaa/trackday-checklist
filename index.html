@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="出走前チェック">
+<meta name="theme-color" content="#F7F8F9">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>出走前チェックリスト</title>
+<style>
+:root{
+  --navy:#16222E;
+  --bg:#F7F8F9;
+  --red:#B03028;
+  --green:#1E8A4C;
+  --gray:#66707A;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  background:var(--bg);
+  color:var(--navy);
+  overflow:hidden;
+  overscroll-behavior:none;
+  touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  transition:background-color .25s;
+}
+button{font:inherit;cursor:pointer;background:none;color:inherit;}
+
+#app{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 14px)
+          calc(env(safe-area-inset-right) + 18px)
+          calc(env(safe-area-inset-bottom) + 18px)
+          calc(env(safe-area-inset-left) + 18px);
+}
+
+/* ヘッダー: 進捗バー + N/19 + 最初から */
+#progressTrack{height:6px;border-radius:3px;background:rgba(102,112,122,.22);overflow:hidden;}
+#progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
+#headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+#counter{font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
+#resetBtn{font-size:1rem;font-weight:600;color:var(--gray);border:1.5px solid rgba(102,112,122,.45);border-radius:10px;padding:10px 16px;}
+
+/* 中央: フェーズ名 / 番号 / 手順 / 補足 */
+main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+#phase{font-size:1.15rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:6px;}
+#num{font-size:clamp(3rem,15vw,4.6rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
+#text{font-size:clamp(1.8rem,8.5vw,3.1rem);font-weight:800;line-height:1.32;margin-top:10px;max-width:100%;overflow-wrap:anywhere;text-wrap:balance;white-space:pre-line;}
+#sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
+#nextStintBtn{display:none;margin-top:32px;padding:20px 36px;border:none;border-radius:16px;background:#fff;color:var(--red);font-size:1.45rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+#rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
+
+/* フッター: 戻る */
+footer{display:flex;}
+#backBtn{min-height:60px;min-width:38%;padding:14px 28px;font-size:1.25rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:14px;}
+
+/* 最終項目「出発!」= 全画面赤 */
+body.final{background:var(--red);color:#fff;}
+body.final #counter,
+body.final #phase,
+body.final #num,
+body.final #text{color:#fff;}
+body.final #progressTrack{background:rgba(255,255,255,.32);}
+body.final #progressFill{background:#fff;}
+body.final #resetBtn,
+body.final #backBtn{color:#fff;border-color:rgba(255,255,255,.6);}
+body.final #nextStintBtn{display:inline-block;}
+
+/* タップ確認の緑フラッシュ */
+#flash{position:fixed;inset:0;background:var(--green);opacity:0;pointer-events:none;z-index:10;}
+#flash.on{animation:flashfade .32s ease-out;}
+@keyframes flashfade{0%{opacity:.5}100%{opacity:0}}
+
+/* ステップ切り替えの小さな動き */
+.swap{animation:swapin .16s ease-out;}
+@keyframes swapin{from{opacity:.3;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion: reduce){
+  .swap{animation:none;}
+  #flash.on{animation-duration:.15s;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div id="progressTrack"><div id="progressFill"></div></div>
+    <div id="headerRow">
+      <div id="counter">1 / 19</div>
+      <button id="resetBtn" type="button">最初から</button>
+    </div>
+  </header>
+
+  <main aria-live="polite">
+    <div id="stepBox">
+      <div id="phase"></div>
+      <div id="num"></div>
+      <div id="text"></div>
+      <div id="sub"></div>
+      <button id="rcBtn" type="button">RaceChronoを開く</button>
+      <button id="nextStintBtn" type="button">次のスティントへ</button>
+    </div>
+  </main>
+
+  <footer>
+    <button id="backBtn" type="button">戻る</button>
+  </footer>
+</div>
+<div id="flash"></div>
+
+<script>
+"use strict";
+
+/* ステップデータ(2026-07-15確定) */
+const STEPS=[
+  {phase:"着座",     text:"シートベルトが車体の外にはみ出していないか確認"},
+  {phase:"着座",     text:"腰ベルトを装着"},
+  {phase:"着座",     text:"シート位置を合わせる"},
+  {phase:"着座",     text:"ミラーを合わせる"},
+  {phase:"車の設定", text:"エンジン始動"},
+  {phase:"車の設定", text:"エアコンを最大に設定、風向を確認"},
+  {phase:"車の設定", text:"制御OFFの専用ボタンを押す", sub:"ABS以外すべてOFF"},
+  {phase:"車の設定", text:"オーディオをOFF", sub:"エンジン音を聞くため"},
+  {phase:"車の設定", text:"RaceChronoを起動", sub:"起動したらこの画面に戻る", openRaceChrono:true},
+  {phase:"装備",     text:"耐火マスクをかぶる"},
+  {phase:"装備",     text:"HANS装着"},
+  {phase:"装備",     text:"肩ベルトを装着"},
+  {phase:"装備",     text:"4点ベルトがHANSにはまっているか確認"},
+  {phase:"装備",     text:"ヘルメットをかぶる"},
+  {phase:"装備",     text:"HANSクリップをヘルメットに装着"},
+  {phase:"出発前",   text:"窓ガラスを開ける"},
+  {phase:"出発前",   text:"走行券を取り出す"},
+  {phase:"出発前",   text:"グローブを装着\nRaceChronoを起動", sub:"タップするとRaceChronoが開きます"},
+  {phase:"出発",     text:"出発!"}
+];
+
+/* 現在ステップを保存し、次回開いたとき続きから再開
+   (localStorageが使えない環境=プレビュー等では従来どおりメモリのみ) */
+const STORE_KEY="checklist_step";
+function loadStep(){
+  try{
+    const v=parseInt(localStorage.getItem(STORE_KEY),10);
+    if(Number.isInteger(v)&&v>=0&&v<STEPS.length)return v;
+  }catch(e){}
+  return 0;
+}
+function saveStep(){
+  try{localStorage.setItem(STORE_KEY,String(i));}catch(e){}
+}
+let i=loadStep();
+
+const $=id=>document.getElementById(id);
+const counterEl=$("counter"), fillEl=$("progressFill"),
+      phaseEl=$("phase"), numEl=$("num"), textEl=$("text"), subEl=$("sub"),
+      stepBox=$("stepBox"), backBtn=$("backBtn"), resetBtn=$("resetBtn"),
+      nextStintBtn=$("nextStintBtn"), rcBtn=$("rcBtn"),
+      flashEl=$("flash"), appEl=$("app");
+
+function render(animate){
+  const s=STEPS[i], n=STEPS.length, last=(i===n-1);
+  counterEl.textContent=(i+1)+" / "+n;
+  fillEl.style.width=((i+1)/n*100)+"%";
+  phaseEl.textContent=s.phase;
+  numEl.textContent=i+1;
+  textEl.textContent=s.text;
+  if(s.sub){subEl.textContent=s.sub;subEl.style.display="";}
+  else{subEl.style.display="none";}
+  rcBtn.style.display=s.openRaceChrono?"inline-block":"none";
+  backBtn.style.visibility=(i===0)?"hidden":"visible";
+  document.body.classList.toggle("final",last);
+  saveStep();
+  if(animate){
+    stepBox.classList.remove("swap");
+    void stepBox.offsetWidth;
+    stepBox.classList.add("swap");
+  }
+}
+
+/* タップ確認: 緑フラッシュ + 振動(対応端末のみ) */
+function confirmFx(){
+  flashEl.classList.remove("on");
+  void flashEl.offsetWidth;
+  flashEl.classList.add("on");
+  if(navigator.vibrate){try{navigator.vibrate(25);}catch(e){}}
+}
+
+function next(){
+  if(i>=STEPS.length-1)return; /* 最終画面はタップでは動かない。リセットは「次のスティントへ」のみ */
+  i++;
+  confirmFx();
+  render(true);
+  if(i===STEPS.length-1)openRaceChrono(); /* 18の確認タップ(素手での最後のタップ)で19「出発!」に進むと同時にRaceChronoを起動 */
+}
+function prev(){if(i>0){i--;render(true);}}
+function resetAll(){i=0;render(true);}
+
+/* 画面のどこをタップしても次へ(ボタンは除く) */
+appEl.addEventListener("click",next);
+backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
+resetBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
+nextStintBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
+
+/* RaceChrono起動: まず直接スキームを試し、1.2秒たっても
+   画面が切り替わらなければショートカット経由にフォールバック。
+   フォールバック用に「RaceChrono」という名前のショートカット
+   (アクション: Appを開く → RaceChrono)を事前に作成しておくこと */
+const RC_SCHEME_URL="racechrono://";
+const RC_SHORTCUT_URL="shortcuts://run-shortcut?name="+encodeURIComponent("RaceChrono");
+function openRaceChrono(){
+  let jumped=false;
+  const onHide=()=>{if(document.visibilityState==="hidden")jumped=true;};
+  document.addEventListener("visibilitychange",onHide);
+  location.href=RC_SCHEME_URL;
+  setTimeout(()=>{
+    document.removeEventListener("visibilitychange",onHide);
+    if(!jumped&&document.visibilityState==="visible"){
+      location.href=RC_SHORTCUT_URL;
+    }
+  },1200);
+}
+rcBtn.addEventListener("click",e=>{e.stopPropagation();openRaceChrono();});
+
+/* Wake Lock: 対応時は画面消灯を抑止。復帰時に再取得 */
+let wakeLock=null;
+async function requestWakeLock(){
+  if(!("wakeLock" in navigator))return;
+  try{wakeLock=await navigator.wakeLock.request("screen");}catch(e){}
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible")requestWakeLock();
+});
+window.addEventListener("pointerdown",()=>requestWakeLock(),{once:true});
+requestWakeLock();
+
+/* 誤操作対策: ピンチ・ダブルタップズームを抑止 */
+document.addEventListener("gesturestart",e=>e.preventDefault());
+window.addEventListener("dblclick",e=>e.preventDefault());
+
+/* オフライン対応: Service Worker登録(ホスティング環境でのみ有効。ローカルやプレビューでは黙って無視される) */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>{
+    navigator.serviceWorker.register("./sw.js").catch(()=>{});
+  });
+}
+
+render(false);
+</script>
+</body>
+</html>
