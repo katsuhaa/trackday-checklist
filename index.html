@@ -47,7 +47,7 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
 #progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
 #headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
 #counter{font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
-#resetBtn{font-size:1rem;font-weight:600;color:var(--gray);border:1.5px solid rgba(102,112,122,.45);border-radius:10px;padding:10px 16px;}
+#resetBtn{font-size:1.2rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:12px;padding:14px 22px;min-height:56px;}
 
 /* 中央: フェーズ名 / 番号 / 手順 / 補足 */
 main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
@@ -57,12 +57,12 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;j
 /* 動作ごとの行(\n区切り)の間にだけ余白を入れる。折り返しの行間は変えない */
 #text .line + .line{margin-top:.6em;}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
-#nextStintBtn{display:none;margin-top:32px;padding:20px 36px;border:none;border-radius:16px;background:#fff;color:var(--red);font-size:1.45rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+#nextStintBtn{display:none;margin-top:32px;padding:24px 44px;border:none;border-radius:18px;background:#fff;color:var(--red);font-size:1.6rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
 /* フッター: 戻る */
 footer{display:flex;}
-#backBtn{min-height:60px;min-width:38%;padding:14px 28px;font-size:1.25rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:14px;}
+#backBtn{flex:1;min-height:72px;padding:16px 28px;font-size:1.5rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:16px;}
 #backBtn:disabled{opacity:.35;cursor:default;}
 
 /* 最終項目「出発!」= 全画面赤 */
