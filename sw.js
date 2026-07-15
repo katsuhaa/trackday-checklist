@@ -1,6 +1,6 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v23";
+const CACHE = "checklist-v24";
 const ASSETS = [
   "./",
   "./index.html",
@@ -34,7 +34,8 @@ self.addEventListener("fetch", e => {
   if (e.request.mode === "navigate") {
     e.respondWith(
       Promise.race([
-        fetch(e.request).then(res => {
+        /* cache:no-cache = 端末のHTTPキャッシュを使わずサーバーに確認(ETag再検証) */
+        fetch(e.request, { cache: "no-cache" }).then(res => {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put("./index.html", copy));
           return res;
