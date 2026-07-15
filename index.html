@@ -47,7 +47,7 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
 #progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
 #headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
 #counter{font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
-#resetBtn{flex:1;min-height:72px;padding:16px 12px;font-size:1.25rem;font-weight:700;color:var(--red);border:2px solid rgba(176,48,40,.55);border-radius:16px;}
+#resetBtn{min-height:56px;padding:12px 20px;font-size:1.2rem;font-weight:700;color:var(--red);border:2px solid rgba(176,48,40,.55);border-radius:14px;}
 
 /* 中央: フェーズ名 / 番号 / 手順 / 補足 */
 main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
@@ -60,8 +60,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;j
 #nextStintBtn{display:none;margin-top:32px;padding:24px 44px;border:none;border-radius:18px;background:#fff;color:var(--red);font-size:1.6rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
-/* フッター: 戻る(広い・グレー) + 最初から(狭い・赤) 役割が見た目で分かるように */
-footer{display:flex;gap:20px;}
+/* フッター: 戻る(全幅) */
+footer{display:flex;}
 #backBtn{flex:2;min-height:72px;padding:16px 28px;font-size:1.5rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:16px;}
 #backBtn:disabled{opacity:.35;cursor:default;}
 
@@ -98,6 +98,7 @@ body.final #nextStintBtn{display:inline-block;}
     <div id="progressTrack"><div id="progressFill"></div></div>
     <div id="headerRow">
       <div id="counter">1 / 10</div>
+      <button id="resetBtn" type="button">最初から</button>
     </div>
   </header>
 
@@ -114,7 +115,6 @@ body.final #nextStintBtn{display:inline-block;}
 
   <footer>
     <button id="backBtn" type="button">戻る</button>
-    <button id="resetBtn" type="button">最初から</button>
   </footer>
 </div>
 <div id="flash"></div>
