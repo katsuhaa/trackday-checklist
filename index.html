@@ -142,7 +142,7 @@ const STEPS=[
 ];
 
 /* 現在ステップを保存し、次回開いたとき続きから再開
-   (localStorageが使えない環境=プレビュー等では従来どおりメモリのみ) */
+   (localStorageが使えない環境=プレビュ等では従来どおりメモリのみ) */
 const STORE_KEY="checklist_step";
 function loadStep(){
   try{
@@ -207,23 +207,13 @@ backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
 resetBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
 nextStintBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
 
-/* RaceChrono起動: まず直接スキームを試し、1.2秒たっても
-   画面が切り替わらなければショートカット経由にフォールバック。
-   フォールバック用に「RaceChrono」という名前のショートカット
-   (アクション: Appを開く → RaceChrono)を事前に作成しておくこと */
-const RC_SCHEME_URL="racechrono://";
+/* RaceChrono起動: iOSショートカット「RaceChrono」
+   (アクション: Appを開く → RaceChrono)経由で開く。
+   racechrono:// を直接開くとRaceChronoの「インポート」画面が
+   出てしまうため使わない。事前にこのショートカットを作成しておくこと。 */
 const RC_SHORTCUT_URL="shortcuts://run-shortcut?name="+encodeURIComponent("RaceChrono");
 function openRaceChrono(){
-  let jumped=false;
-  const onHide=()=>{if(document.visibilityState==="hidden")jumped=true;};
-  document.addEventListener("visibilitychange",onHide);
-  location.href=RC_SCHEME_URL;
-  setTimeout(()=>{
-    document.removeEventListener("visibilitychange",onHide);
-    if(!jumped&&document.visibilityState==="visible"){
-      location.href=RC_SHORTCUT_URL;
-    }
-  },1200);
+  location.href=RC_SHORTCUT_URL;
 }
 rcBtn.addEventListener("click",e=>{e.stopPropagation();openRaceChrono();});
 
