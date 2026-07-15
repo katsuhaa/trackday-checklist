@@ -73,8 +73,9 @@ body.final #num,
 body.final #text{color:#fff;}
 body.final #progressTrack{background:rgba(255,255,255,.32);}
 body.final #progressFill{background:#fff;}
-body.final #resetBtn,
 body.final #backBtn{color:#fff;border-color:rgba(255,255,255,.6);}
+/* 最終画面ではリセットは「次のスティントへ」に一本化。同じ働きの「最初から」は隠す */
+body.final #resetBtn{display:none;}
 body.final #nextStintBtn{display:inline-block;}
 
 /* タップ確認の緑フラッシュ */
