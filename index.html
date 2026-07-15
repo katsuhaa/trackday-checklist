@@ -42,7 +42,7 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
           calc(env(safe-area-inset-left) + 18px);
 }
 
-/* ヘッダー: 進捗バー + N/11 + 最初から */
+/* ヘッダー: 進捗バー + N/13 + 最初から */
 #progressTrack{height:6px;border-radius:3px;background:rgba(102,112,122,.22);overflow:hidden;}
 #progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
 #headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
@@ -94,7 +94,7 @@ body.final #nextStintBtn{display:inline-block;}
   <header>
     <div id="progressTrack"><div id="progressFill"></div></div>
     <div id="headerRow">
-      <div id="counter">1 / 11</div>
+      <div id="counter">1 / 13</div>
       <button id="resetBtn" type="button">最初から</button>
     </div>
   </header>
@@ -119,15 +119,17 @@ body.final #nextStintBtn{display:inline-block;}
 <script>
 "use strict";
 
-/* ステップデータ(2026-07-15 19項目→11項目に統合) */
+/* ステップデータ(2026-07-15 確認項目は独立ステップとして大きく表示する) */
 const STEPS=[
-  {phase:"着座",     text:"ハーネスの\n腰ベルトを締める", sub:"肩ベルトはHANS装着後。ベルトがドアの外に出ていないかも確認"},
+  {phase:"着座",     text:"シートベルトが車体の外にはみ出していないか確認"},
+  {phase:"着座",     text:"ハーネスの\n腰ベルトを締める", sub:"肩ベルトはHANS装着後"},
   {phase:"着座",     text:"シート位置・ミラー調整"},
   {phase:"車の設定", text:"エンジン始動"},
   {phase:"車の設定", text:"エアコン最大・風向確認"},
   {phase:"車の設定", text:"制御OFF・オーディオOFF", sub:"ABS以外すべてOFF。エンジン音を聞くためオーディオも切る"},
   {phase:"装備",     text:"耐火マスク・HANS装着"},
-  {phase:"装備",     text:"肩ベルト装着", sub:"4点ベルトがHANSに掛かっているか確認"},
+  {phase:"装備",     text:"肩ベルト装着"},
+  {phase:"装備",     text:"4点ベルトがHANSにはまっているか確認"},
   {phase:"装備",     text:"ヘルメット・HANSクリップ装着"},
   {phase:"出発前",   text:"窓オープン・走行券準備\nRaceChrono起動", sub:"タップでRaceChronoが開く。起動を確認したらこの画面に戻る", launchRC:true},
   {phase:"出発前",   text:"グローブ装着", sub:"タップしてからグローブをはめる"},

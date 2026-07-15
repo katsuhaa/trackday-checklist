@@ -1,6 +1,6 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v10";
+const CACHE = "checklist-v11";
 const ASSETS = [
   "./",
   "./index.html",
