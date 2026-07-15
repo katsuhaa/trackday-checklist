@@ -1,6 +1,6 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v26";
+const CACHE = "checklist-v27";
 const ASSETS = [
   "./",
   "./index.html",
@@ -32,10 +32,13 @@ self.addEventListener("fetch", e => {
   /* ページ本体はネットワーク優先(最新をすぐ反映)。
      2.5秒以内に取れない・圏外のときはキャッシュで表示 */
   if (e.request.mode === "navigate") {
+    /* 毎回ユニークなクエリを付けてCDN・HTTPキャッシュを完全に素通りし、
+       デプロイ直後でも即座に最新を取得する */
+    const bustURL = new URL(e.request.url);
+    bustURL.searchParams.set("t", Date.now());
     e.respondWith(
       Promise.race([
-        /* cache:no-cache = 端末のHTTPキャッシュを使わずサーバーに確認(ETag再検証) */
-        fetch(e.request, { cache: "no-cache" }).then(res => {
+        fetch(bustURL, { cache: "no-store" }).then(res => {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put("./index.html", copy));
           return res;
