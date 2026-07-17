@@ -110,12 +110,8 @@ body.final #nextStintBtn{display:inline-block;}
 #confirmYes{background:var(--red);color:#fff;border:none;}
 #confirmNo{background:#fff;color:var(--navy);border:3px solid rgba(102,112,122,.45);}
 
-/* 全チェック完了バナー: 遷移までの待ち時間に「完了した」ことを大きく示す */
-#doneBanner{position:fixed;left:0;right:0;top:40%;z-index:15;display:none;
-  text-align:center;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:800;color:#fff;
-  background:rgba(30,138,76,.94);padding:28px 16px;pointer-events:none;}
-#doneBanner.show{display:block;animation:bannerpop .25s ease-out;}
-@keyframes bannerpop{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:none;}}
+/* 全チェック完了: 遷移までの待ち時間だけ背景がふわっと緑に変わる(控えめな合図) */
+body.advancing{background:#E4F3E9;}
 
 /* タップ確認の緑フラッシュ */
 #flash{position:fixed;inset:0;background:var(--green);opacity:0;pointer-events:none;z-index:10;}
@@ -157,9 +153,6 @@ body.final #nextStintBtn{display:inline-block;}
   </footer>
 </div>
 <div id="flash"></div>
-
-<!-- 全チェック完了の瞬間に出す大きなバナー(0.8秒の待ちの間の状態表示) -->
-<div id="doneBanner">✓ すべてチェック完了</div>
 
 <!-- リセット確認: 全画面・巨大2択(車内でも押し間違えない) -->
 <div id="confirmOverlay">
@@ -294,10 +287,9 @@ function confirmFx(){
    全項目チェックで少し間を置いて次ページへ自動遷移。
    最終ページは全チェックでRaceChronoを起動 */
 let advanceTimer=null;
-const doneBanner=$("doneBanner");
 function cancelAdvance(){
   if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
-  doneBanner.classList.remove("show");
+  document.body.classList.remove("advancing");
 }
 function toggleItem(idx){
   checked[idx]=!checked[idx];
@@ -306,14 +298,14 @@ function toggleItem(idx){
   render(false);
   cancelAdvance();
   if(checked.every(Boolean)){
-    /* 完了を大きく表示してから0.8秒後に次ページへ */
+    /* 背景を緑にして完了を控えめに示し、0.8秒後に次ページへ */
     confirmFx();
-    doneBanner.classList.add("show");
+    document.body.classList.add("advancing");
     advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},800);
   }
 }
 function completePage(){
-  doneBanner.classList.remove("show");
+  document.body.classList.remove("advancing");
   if(i>=STEPS.length-1){openRaceChrono();return;}
   i++;
   checked=freshChecks();
