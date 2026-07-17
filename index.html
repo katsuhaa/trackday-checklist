@@ -71,9 +71,9 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;t
 .item .label{flex:1;overflow-wrap:anywhere;}
 .item.done .card{border-color:var(--green);background:rgba(30,138,76,.08);}
 .item.done .box{background:var(--green);border-color:var(--green);}
-body.final .item .card{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.55);color:#fff;}
-body.final .item.done .card{background:rgba(255,255,255,.28);border-color:#fff;}
-body.final .item.done .box{background:#fff;border-color:#fff;color:var(--red);}
+/* 最終ページ: チェックなしの大きな表示のみ。画面全体がRaceChrono起動ボタン */
+body.final #text{justify-content:center;gap:30px;}
+.finalLine{font-size:clamp(1.7rem,7.5vw,2.3rem);font-weight:800;line-height:1.35;color:#fff;text-align:center;}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
 /* 次のスティントへ: 最終ページの右上(最初からの位置)に表示。チェック項目から離して誤タップを防ぐ */
 #nextStintBtn{display:none;min-height:56px;padding:12px 20px;border:none;border-radius:14px;background:#fff;color:var(--red);font-size:1.2rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
@@ -109,6 +109,13 @@ body.final #nextStintBtn{display:inline-block;}
 #confirmYes,#confirmNo{flex:1;border-radius:26px;font-size:clamp(1.6rem,7vw,2.2rem);font-weight:800;}
 #confirmYes{background:var(--red);color:#fff;border:none;}
 #confirmNo{background:#fff;color:var(--navy);border:3px solid rgba(102,112,122,.45);}
+
+/* 全チェック完了バナー: 遷移までの待ち時間に「完了した」ことを大きく示す */
+#doneBanner{position:fixed;left:0;right:0;top:40%;z-index:15;display:none;
+  text-align:center;font-size:clamp(1.8rem,8vw,2.4rem);font-weight:800;color:#fff;
+  background:rgba(30,138,76,.94);padding:28px 16px;pointer-events:none;}
+#doneBanner.show{display:block;animation:bannerpop .25s ease-out;}
+@keyframes bannerpop{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:none;}}
 
 /* タップ確認の緑フラッシュ */
 #flash{position:fixed;inset:0;background:var(--green);opacity:0;pointer-events:none;z-index:10;}
@@ -150,6 +157,9 @@ body.final #nextStintBtn{display:inline-block;}
   </footer>
 </div>
 <div id="flash"></div>
+
+<!-- 全チェック完了の瞬間に出す大きなバナー(0.8秒の待ちの間の状態表示) -->
+<div id="doneBanner">✓ すべてチェック完了</div>
 
 <!-- リセット確認: 全画面・巨大2択(車内でも押し間違えない) -->
 <div id="confirmOverlay">
@@ -229,25 +239,36 @@ function render(animate){
   fillEl.style.width=((i+1)/n*100)+"%";
   phaseEl.textContent=s.phase;
   numEl.textContent=i+1;
-  /* 各項目をチェックボックス付きボタンとして描画 */
   textEl.textContent="";
-  itemsOf(s).forEach((line,idx)=>{
-    const btn=document.createElement("button");
-    btn.type="button";
-    btn.className="item"+(checked[idx]?" done":"");
-    const box=document.createElement("span");
-    box.className="box";
-    box.textContent=checked[idx]?"✓":"";
-    const label=document.createElement("span");
-    label.className="label";
-    label.textContent=line;
-    const card=document.createElement("span");
-    card.className="card";
-    card.append(box,label);
-    btn.append(card);
-    onPress(btn,()=>toggleItem(idx));
-    textEl.appendChild(btn);
-  });
+  if(last){
+    /* 最終ページはチェックなし(グローブ装着の場面のため)。
+       表示のみで、画面のどこをタップしてもRaceChronoが起動する */
+    itemsOf(s).forEach(line=>{
+      const div=document.createElement("div");
+      div.className="finalLine";
+      div.textContent=line;
+      textEl.appendChild(div);
+    });
+  }else{
+    /* 各項目をチェックボックス付きボタンとして描画 */
+    itemsOf(s).forEach((line,idx)=>{
+      const btn=document.createElement("button");
+      btn.type="button";
+      btn.className="item"+(checked[idx]?" done":"");
+      const box=document.createElement("span");
+      box.className="box";
+      box.textContent=checked[idx]?"✓":"";
+      const label=document.createElement("span");
+      label.className="label";
+      label.textContent=line;
+      const card=document.createElement("span");
+      card.className="card";
+      card.append(box,label);
+      btn.append(card);
+      onPress(btn,()=>toggleItem(idx));
+      textEl.appendChild(btn);
+    });
+  }
   if(s.sub){subEl.textContent=s.sub;subEl.style.display="";}
   else{subEl.style.display="none";}
   rcBtn.style.display=s.openRaceChrono?"inline-block":"none";
@@ -273,8 +294,10 @@ function confirmFx(){
    全項目チェックで少し間を置いて次ページへ自動遷移。
    最終ページは全チェックでRaceChronoを起動 */
 let advanceTimer=null;
+const doneBanner=$("doneBanner");
 function cancelAdvance(){
   if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
+  doneBanner.classList.remove("show");
 }
 function toggleItem(idx){
   checked[idx]=!checked[idx];
@@ -283,16 +306,18 @@ function toggleItem(idx){
   render(false);
   cancelAdvance();
   if(checked.every(Boolean)){
-    /* 最後の✓を目で確認できるよう0.8秒おいて次ページへ */
+    /* 完了を大きく表示してから0.8秒後に次ページへ */
+    confirmFx();
+    doneBanner.classList.add("show");
     advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},800);
   }
 }
 function completePage(){
+  doneBanner.classList.remove("show");
   if(i>=STEPS.length-1){openRaceChrono();return;}
   i++;
   checked=freshChecks();
   saveChecks();
-  confirmFx();
   render(true);
 }
 /* 戻る/リセットは保留中の自動遷移タイマーを必ず破棄する
@@ -301,6 +326,10 @@ function prev(){if(i>0){cancelAdvance();i--;checked=freshChecks();saveChecks();r
 function resetAll(){cancelAdvance();i=0;checked=freshChecks();saveChecks();render(true);}
 
 onPress(backBtn,()=>prev());
+
+/* 最終ページでは画面のどこをタップしてもRaceChronoを起動
+   (ボタン類は各自stopPropagationするためここには届かない) */
+onPress(appEl,()=>{if(i>=STEPS.length-1)openRaceChrono();});
 
 /* 誤操作防止: リセット系ボタンは全画面の巨大2択で確認する。
    小さいダイアログは車内で押せないため使わない */
