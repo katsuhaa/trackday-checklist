@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#F7F8F9">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
-<title>出走前チェックリスト</title>
+<title>走行日チェックリスト</title>
 <style>
 :root{
   --navy:#16222E;
@@ -32,35 +32,47 @@ body{
   transition:background-color .25s;
 }
 button{font:inherit;cursor:pointer;background:none;color:inherit;}
+strong{font-weight:800;}
 
+/* ===== 起動メニュー: 走行前チェック / 出走前チェック(車内) ===== */
+#menu{
+  position:fixed;inset:0;display:flex;flex-direction:column;gap:18px;
+  padding:calc(env(safe-area-inset-top) + 28px)
+          calc(env(safe-area-inset-right) + 20px)
+          calc(env(safe-area-inset-bottom) + 24px)
+          calc(env(safe-area-inset-left) + 20px);
+}
+#menuTitle{font-size:clamp(1.5rem,6.5vw,2rem);font-weight:800;text-align:center;line-height:1.3;flex:0 0 auto;}
+.menuBtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  border:none;border-radius:26px;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.15);}
+#toPre{background:var(--navy);}
+#toApp{background:var(--green);}
+.mBig{font-size:clamp(1.9rem,8.5vw,2.5rem);font-weight:800;}
+.mSub{font-size:1.05rem;font-weight:600;opacity:.9;padding:0 10px;text-align:center;line-height:1.4;}
+
+/* ≡メニュー ボタン(各画面から戻る) */
+.menuLink{font-size:1rem;font-weight:700;border-radius:12px;padding:10px 12px;
+  border:2px solid rgba(102,112,122,.45);color:var(--gray);}
+
+/* ===== 出走前チェック(車内・既存) ===== */
 #app{
-  position:fixed;inset:0;
-  display:flex;flex-direction:column;
+  position:fixed;inset:0;display:none;flex-direction:column;
   padding:calc(env(safe-area-inset-top) + 14px)
           calc(env(safe-area-inset-right) + 18px)
           calc(env(safe-area-inset-bottom) + 18px)
           calc(env(safe-area-inset-left) + 18px);
 }
-
-/* ヘッダー: 進捗バー + N/7 + 最初から */
 #progressTrack{height:6px;border-radius:3px;background:rgba(102,112,122,.22);overflow:hidden;}
 #progressFill{height:100%;width:0;border-radius:3px;background:var(--green);transition:width .18s ease-out,background-color .25s;}
-#headerRow{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
-#counter{font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
+#headerRow{display:flex;align-items:center;gap:10px;margin-top:12px;}
+#counter{flex:1;text-align:center;font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
 #resetBtn{min-height:56px;padding:12px 20px;font-size:1.2rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:14px;}
 
-/* 中央: フェーズ名 / 番号 / 手順 / 補足
-   チェックボタンが縦の空きスペースをすべて使って広がるレイアウト */
 main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;}
 #stepBox{flex:1;min-height:0;width:100%;max-width:560px;display:flex;flex-direction:column;}
-/* フェーズ名と番号はコンパクトにして、チェックボタンに画面を最大限使う */
 #phase{font-size:1.1rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:2px;}
 #num{font-size:clamp(1.8rem,7vw,2.4rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
-/* 各項目 = チェックボックス付きの大きなボタン。
-   flex:1 で縦の空きスペースを等分し、常に最大サイズ・全項目同じ大きさになる */
 #text{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;margin:12px 0;width:100%;}
-/* .item = タップ判定(縦スペースを等分したスロット全体)。
-   .card = 見た目(コンパクト)。判定は広く、見た目は離して押し分けやすく */
 .item{flex:1;min-height:104px;display:flex;flex-direction:column;justify-content:center;
   width:100%;background:none;border:none;padding:5px 0;}
 .item .card{flex:1;display:flex;align-items:center;gap:18px;width:100%;min-height:92px;padding:14px 22px;
@@ -71,20 +83,16 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;t
 .item .label{flex:1;overflow-wrap:anywhere;}
 .item.done .card{border-color:var(--green);background:rgba(30,138,76,.08);}
 .item.done .box{background:var(--green);border-color:var(--green);}
-/* 最終ページ: チェックなしの大きな表示のみ。画面全体がRaceChrono起動ボタン */
 body.final #text{justify-content:center;gap:30px;}
 .finalLine{font-size:clamp(1.7rem,7.5vw,2.3rem);font-weight:800;line-height:1.35;color:#fff;text-align:center;}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
-/* 次のスティントへ: 最終ページの右上(最初からの位置)に表示。チェック項目から離して誤タップを防ぐ */
 #nextStintBtn{display:none;min-height:56px;padding:12px 20px;border:none;border-radius:14px;background:#fff;color:var(--red);font-size:1.2rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
-/* フッター: 戻る(全幅)。チェック項目との間に緩衝地帯を設けて誤タップを防ぐ */
 footer{display:flex;margin-top:32px;}
 #backBtn{flex:2;min-height:80px;padding:18px 28px;font-size:1.6rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:18px;}
 #backBtn:disabled{opacity:.35;cursor:default;}
 
-/* 最終項目「出発!」= 全画面赤 */
 body.final{background:var(--red);color:#fff;}
 body.final #counter,
 body.final #phase,
@@ -93,11 +101,11 @@ body.final #text{color:#fff;}
 body.final #progressTrack{background:rgba(255,255,255,.32);}
 body.final #progressFill{background:#fff;}
 body.final #backBtn{color:#fff;border-color:rgba(255,255,255,.6);}
-/* 最終画面ではリセットは「次のスティントへ」に一本化。同じ働きの「最初から」は隠す */
+body.final #toMenuApp{color:#fff;border-color:rgba(255,255,255,.6);}
 body.final #resetBtn{display:none;}
 body.final #nextStintBtn{display:inline-block;}
 
-/* リセット確認の全画面2択。ボタンが画面を半分ずつ使う */
+/* リセット確認の全画面2択 */
 #confirmOverlay{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;gap:30px;
   background:var(--bg);color:var(--navy);
   padding:calc(env(safe-area-inset-top) + 24px)
@@ -110,28 +118,82 @@ body.final #nextStintBtn{display:inline-block;}
 #confirmYes{background:var(--red);color:#fff;border:none;}
 #confirmNo{background:#fff;color:var(--navy);border:3px solid rgba(102,112,122,.45);}
 
-/* 全チェック完了: 遷移までの待ち時間だけ背景がふわっと緑に変わる(控えめな合図) */
 body.advancing{background:#E4F3E9;}
 
-/* タップ確認の緑フラッシュ */
 #flash{position:fixed;inset:0;background:var(--green);opacity:0;pointer-events:none;z-index:10;}
 #flash.on{animation:flashfade .32s ease-out;}
 @keyframes flashfade{0%{opacity:.5}100%{opacity:0}}
-
-/* ステップ切り替えの小さな動き */
 .swap{animation:swapin .16s ease-out;}
 @keyframes swapin{from{opacity:.3;transform:translateY(8px);}to{opacity:1;transform:none;}}
 @media (prefers-reduced-motion: reduce){
   .swap{animation:none;}
   #flash.on{animation-duration:.15s;}
 }
+
+/* ===== 走行前チェック(スクロール式・車外で使う) ===== */
+#pre{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;}
+.preBar{display:flex;align-items:center;gap:12px;flex:0 0 auto;
+  background:var(--navy);color:#fff;
+  padding:calc(env(safe-area-inset-top) + 12px)
+          calc(env(safe-area-inset-right) + 16px) 12px
+          calc(env(safe-area-inset-left) + 16px);}
+.preBar .menuLink{border-color:rgba(255,255,255,.55);color:#fff;}
+.preBarTitle{font-size:1.3rem;font-weight:800;}
+.preBody{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px calc(env(safe-area-inset-right) + 16px)
+          calc(env(safe-area-inset-bottom) + 48px)
+          calc(env(safe-area-inset-left) + 16px);}
+.preTitle{font-size:1.45rem;font-weight:800;line-height:1.35;}
+.preSubtitle{font-size:1.05rem;font-weight:700;color:var(--gray);margin:4px 0 4px;}
+.preH{font-size:1.25rem;font-weight:800;color:var(--green);margin:24px 0 12px;
+  padding-bottom:6px;border-bottom:2px solid rgba(30,138,76,.3);}
+.setCard{background:#fff;border:2px solid rgba(102,112,122,.25);border-radius:14px;padding:4px 14px;margin-top:8px;}
+.setRow{display:flex;justify-content:space-between;gap:14px;padding:11px 0;
+  border-bottom:1px solid rgba(102,112,122,.16);font-size:1.02rem;line-height:1.4;}
+.setRow:last-child{border-bottom:none;}
+.setRow .k{color:var(--gray);font-weight:600;flex:1;}
+.setRow .v{font-weight:700;text-align:right;flex:1;}
+.note{background:#FFF6E5;border:2px solid #F0C36D;border-radius:12px;padding:12px 14px;margin-top:12px;
+  font-size:1.05rem;line-height:1.55;font-weight:600;}
+.prow{display:flex;align-items:flex-start;gap:14px;width:100%;min-height:66px;padding:14px;
+  border:2px solid rgba(102,112,122,.3);border-radius:14px;background:#fff;margin-bottom:10px;
+  font-size:1.15rem;font-weight:600;line-height:1.45;text-align:left;color:var(--navy);}
+.prow .pbox{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:2.5px solid rgba(102,112,122,.5);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:#fff;margin-top:1px;}
+.prow .plabel{flex:1;overflow-wrap:anywhere;}
+.prow.pdone{border-color:var(--green);background:rgba(30,138,76,.08);}
+.prow.pdone .pbox{background:var(--green);border-color:var(--green);}
+.plink{display:inline-block;margin-top:8px;color:var(--green);font-weight:800;
+  text-decoration:underline;font-size:1.05rem;}
+.refCard{background:#fff;border:2px solid rgba(102,112,122,.25);border-radius:14px;
+  padding:14px 16px;margin-top:10px;font-size:1.05rem;line-height:1.6;}
+.refCard .rItem{margin:8px 0;padding-left:16px;position:relative;}
+.refCard .rItem::before{content:"・";position:absolute;left:0;color:var(--gray);}
+.clearBtn{width:100%;min-height:60px;margin-top:26px;border:2px solid rgba(176,48,40,.5);
+  border-radius:14px;color:var(--red);font-size:1.15rem;font-weight:700;background:#fff;}
 </style>
 </head>
 <body>
+
+<!-- 起動メニュー -->
+<div id="menu">
+  <div id="menuTitle">走行日チェックリスト</div>
+  <button id="toPre" class="menuBtn" type="button">
+    <span class="mBig">走行前チェック</span>
+    <span class="mSub">前日〜コースイン前の準備・空気圧・走り方</span>
+  </button>
+  <button id="toApp" class="menuBtn" type="button">
+    <span class="mBig">出走前チェック</span>
+    <span class="mSub">乗車後〜コースイン直前(車内で使う)</span>
+  </button>
+</div>
+
+<!-- 出走前チェック(車内) -->
 <div id="app">
   <header>
     <div id="progressTrack"><div id="progressFill"></div></div>
     <div id="headerRow">
+      <button id="toMenuApp" class="menuLink" type="button">≡ メニュー</button>
       <div id="counter">1 / 7</div>
       <button id="resetBtn" type="button">最初から</button>
       <button id="nextStintBtn" type="button">次のスティントへ</button>
@@ -152,59 +214,27 @@ body.advancing{background:#E4F3E9;}
     <button id="backBtn" type="button">戻る</button>
   </footer>
 </div>
+
+<!-- 走行前チェック(スクロール式) -->
+<div id="pre">
+  <div class="preBar">
+    <button id="toMenuPre" class="menuLink" type="button">≡ メニュー</button>
+    <div class="preBarTitle">走行前チェック</div>
+  </div>
+  <div class="preBody" id="preBody"></div>
+</div>
+
 <div id="flash"></div>
 
-<!-- リセット確認: 全画面・巨大2択(車内でも押し間違えない) -->
+<!-- 確認: 全画面・巨大2択 -->
 <div id="confirmOverlay">
   <div id="confirmTitle"></div>
-  <button id="confirmYes" type="button">はい、1ページ目に戻す</button>
+  <button id="confirmYes" type="button">はい</button>
   <button id="confirmNo" type="button">やめる</button>
 </div>
 
 <script>
 "use strict";
-
-/* ステップデータ(2026-07-15 確認項目は独立ステップとして大きく表示する) */
-const STEPS=[
-  {phase:"車の設定", text:"エンジン始動\nエアコンを最大に設定\n風向を確認"},
-  {phase:"車の設定", text:"制御OFFの専用ボタンを押す\nオーディオをOFF", sub:"ABS以外すべてOFF。エンジン音を聞くため"},
-  {phase:"着座",     text:"シートベルトが車体の外にはみ出していないか確認\nハーネスの腰ベルトを締める\nシート位置を合わせる", sub:"肩ベルトはHANS装着後"},
-  {phase:"装備",     text:"耐火マスクをかぶる\nHANSを装着"},
-  {phase:"装備",     text:"肩ベルトを装着\n4点ベルトがHANSにはまっているか確認"},
-  {phase:"装備",     text:"ヘルメットをかぶる\nHANSクリップを装着\nミラーを合わせる"},
-  {phase:"出発",     text:"窓ガラスを開ける\n走行券を取り出す\nタップでRaceChrono起動して出発!"}
-];
-
-/* 現在ステップとチェック状態を保存し、次回開いたとき続きから再開
-   (localStorageが使えない環境=プレビュ等では従来どおりメモリのみ) */
-const STORE_KEY="checklist_step";
-const CHECK_KEY="checklist_checked";
-function loadStep(){
-  try{
-    const v=parseInt(localStorage.getItem(STORE_KEY),10);
-    if(Number.isInteger(v)&&v>=0&&v<STEPS.length)return v;
-  }catch(e){}
-  return 0;
-}
-function saveStep(){
-  try{localStorage.setItem(STORE_KEY,String(i));}catch(e){}
-}
-let i=loadStep();
-
-function itemsOf(step){return step.text.split("\n");}
-function freshChecks(){return itemsOf(STEPS[i]).map(()=>false);}
-function loadChecks(){
-  try{
-    const a=JSON.parse(localStorage.getItem(CHECK_KEY));
-    /* 項目数が一致し、かつ未完了のときだけ復元(全部✓の状態は復元しない=安全側) */
-    if(Array.isArray(a)&&a.length===itemsOf(STEPS[i]).length&&a.some(v=>!v))return a.map(Boolean);
-  }catch(e){}
-  return freshChecks();
-}
-function saveChecks(){
-  try{localStorage.setItem(CHECK_KEY,JSON.stringify(checked));}catch(e){}
-}
-let checked=loadChecks();
 
 const $=id=>document.getElementById(id);
 
@@ -220,11 +250,68 @@ function onPress(el,fn){
     fn(ev);
   });
 }
+
+/* **強調** をそのまま <strong> に変換して安全に描画する */
+function withEmph(text){
+  const frag=document.createDocumentFragment();
+  text.split(/\*\*/).forEach((part,idx)=>{
+    if(idx%2===1){const s=document.createElement("strong");s.textContent=part;frag.appendChild(s);}
+    else frag.appendChild(document.createTextNode(part));
+  });
+  return frag;
+}
+
+/* ===================== 画面切り替え ===================== */
+const menuEl=$("menu"), appEl=$("app"), preEl=$("pre");
+function showScreen(name){
+  confirmOverlay.classList.remove("show");confirmAction=null;
+  menuEl.style.display=(name==="menu")?"flex":"none";
+  appEl.style.display =(name==="app") ?"flex":"none";
+  preEl.style.display =(name==="pre") ?"flex":"none";
+  if(name!=="app")document.body.classList.remove("final","advancing");
+  if(name==="app")render(false);
+  if(name==="pre"){renderPre();$("preBody").scrollTop=0;}
+}
+
+/* ===================== 出走前チェック(車内) ===================== */
+const STEPS=[
+  {phase:"車の設定", text:"エンジン始動\nエアコンを最大に設定\n風向を確認"},
+  {phase:"車の設定", text:"制御OFFの専用ボタンを押す\nオーディオをOFF", sub:"ABS以外すべてOFF。エンジン音を聞くため"},
+  {phase:"着座",     text:"シートベルトが車体の外にはみ出していないか確認\nハーネスの腰ベルトを締める\nシート位置を合わせる", sub:"肩ベルトはHANS装着後"},
+  {phase:"装備",     text:"耐火マスクをかぶる\nHANSを装着"},
+  {phase:"装備",     text:"肩ベルトを装着\n4点ベルトがHANSにはまっているか確認"},
+  {phase:"装備",     text:"ヘルメットをかぶる\nHANSクリップを装着\nミラーを合わせる"},
+  {phase:"出発",     text:"窓ガラスを開ける\n走行券を取り出す\nタップでRaceChrono起動して出発!"}
+];
+
+const STORE_KEY="checklist_step";
+const CHECK_KEY="checklist_checked";
+function loadStep(){
+  try{
+    const v=parseInt(localStorage.getItem(STORE_KEY),10);
+    if(Number.isInteger(v)&&v>=0&&v<STEPS.length)return v;
+  }catch(e){}
+  return 0;
+}
+function saveStep(){try{localStorage.setItem(STORE_KEY,String(i));}catch(e){}}
+let i=loadStep();
+
+function itemsOf(step){return step.text.split("\n");}
+function freshChecks(){return itemsOf(STEPS[i]).map(()=>false);}
+function loadChecks(){
+  try{
+    const a=JSON.parse(localStorage.getItem(CHECK_KEY));
+    if(Array.isArray(a)&&a.length===itemsOf(STEPS[i]).length&&a.some(v=>!v))return a.map(Boolean);
+  }catch(e){}
+  return freshChecks();
+}
+function saveChecks(){try{localStorage.setItem(CHECK_KEY,JSON.stringify(checked));}catch(e){}}
+let checked=loadChecks();
+
 const counterEl=$("counter"), fillEl=$("progressFill"),
       phaseEl=$("phase"), numEl=$("num"), textEl=$("text"), subEl=$("sub"),
       stepBox=$("stepBox"), backBtn=$("backBtn"), resetBtn=$("resetBtn"),
-      nextStintBtn=$("nextStintBtn"), rcBtn=$("rcBtn"),
-      flashEl=$("flash"), appEl=$("app");
+      nextStintBtn=$("nextStintBtn"), rcBtn=$("rcBtn"), flashEl=$("flash");
 
 function render(animate){
   const s=STEPS[i], n=STEPS.length, last=(i===n-1);
@@ -234,8 +321,6 @@ function render(animate){
   numEl.textContent=i+1;
   textEl.textContent="";
   if(last){
-    /* 最終ページはチェックなし(グローブ装着の場面のため)。
-       表示のみで、画面のどこをタップしてもRaceChronoが起動する */
     itemsOf(s).forEach(line=>{
       const div=document.createElement("div");
       div.className="finalLine";
@@ -243,7 +328,6 @@ function render(animate){
       textEl.appendChild(div);
     });
   }else{
-    /* 各項目をチェックボックス付きボタンとして描画 */
     itemsOf(s).forEach((line,idx)=>{
       const btn=document.createElement("button");
       btn.type="button";
@@ -265,7 +349,7 @@ function render(animate){
   if(s.sub){subEl.textContent=s.sub;subEl.style.display="";}
   else{subEl.style.display="none";}
   rcBtn.style.display=s.openRaceChrono?"inline-block":"none";
-  backBtn.disabled=(i===0); /* 1番目は戻る先がないので薄く表示(非表示にはしない) */
+  backBtn.disabled=(i===0);
   document.body.classList.toggle("final",last);
   saveStep();
   if(animate){
@@ -275,7 +359,6 @@ function render(animate){
   }
 }
 
-/* タップ確認: 緑フラッシュ + 振動(対応端末のみ) */
 function confirmFx(){
   flashEl.classList.remove("on");
   void flashEl.offsetWidth;
@@ -283,9 +366,6 @@ function confirmFx(){
   if(navigator.vibrate){try{navigator.vibrate(25);}catch(e){}}
 }
 
-/* 項目タップ=チェックの切り替え(もう一度押せば解除できる)。
-   全項目チェックで少し間を置いて次ページへ自動遷移。
-   最終ページは全チェックでRaceChronoを起動 */
 let advanceTimer=null;
 function cancelAdvance(){
   if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
@@ -298,7 +378,6 @@ function toggleItem(idx){
   render(false);
   cancelAdvance();
   if(checked.every(Boolean)){
-    /* 背景を緑にして完了を控えめに示し、0.8秒後に次ページへ */
     confirmFx();
     document.body.classList.add("advancing");
     advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},800);
@@ -312,47 +391,205 @@ function completePage(){
   saveChecks();
   render(true);
 }
-/* 戻る/リセットは保留中の自動遷移タイマーを必ず破棄する
-   (全チェック直後の待ち時間中に押されても誤って進まないように) */
 function prev(){if(i>0){cancelAdvance();i--;checked=freshChecks();saveChecks();render(true);}}
 function resetAll(){cancelAdvance();i=0;checked=freshChecks();saveChecks();render(true);}
 
 onPress(backBtn,()=>prev());
-
-/* 最終ページでは画面のどこをタップしてもRaceChronoを起動
-   (ボタン類は各自stopPropagationするためここには届かない) */
+/* 最終ページでは画面のどこをタップしてもRaceChronoを起動 */
 onPress(appEl,()=>{if(i>=STEPS.length-1)openRaceChrono();});
 
-/* 誤操作防止: リセット系ボタンは全画面の巨大2択で確認する。
-   小さいダイアログは車内で押せないため使わない */
+/* 確認: 全画面の巨大2択(小さいダイアログは車内で押せないため使わない) */
 const confirmOverlay=$("confirmOverlay"), confirmTitle=$("confirmTitle"),
       confirmYes=$("confirmYes"), confirmNo=$("confirmNo");
-function askReset(title){
+let confirmAction=null;
+function askConfirm(title,yesLabel,action){
   confirmTitle.textContent=title;
+  confirmYes.textContent=yesLabel;
+  confirmAction=action;
   confirmOverlay.classList.add("show");
 }
-onPress(confirmYes,()=>{
-  confirmOverlay.classList.remove("show");
-  resetAll();
-});
-onPress(confirmNo,()=>{
-  confirmOverlay.classList.remove("show");
-});
-onPress(resetBtn,()=>askReset("1ページ目に戻しますか?"));
-/* 次のスティントへ: 最終ページ=全チェック完了後なので確認なしで即リセット */
+onPress(confirmYes,()=>{confirmOverlay.classList.remove("show");const a=confirmAction;confirmAction=null;if(a)a();});
+onPress(confirmNo,()=>{confirmOverlay.classList.remove("show");confirmAction=null;});
+onPress(resetBtn,()=>askConfirm("1ページ目に戻しますか?","はい、1ページ目に戻す",resetAll));
+/* 次のスティントへ: 全チェック完了後の操作なので確認なしで即リセット */
 onPress(nextStintBtn,()=>resetAll());
 
-/* RaceChrono起動: iOSショートカット「RaceChrono」
-   (アクション: Appを開く → RaceChrono)経由で開く。
-   racechrono:// を直接開くとRaceChronoの「インポート」画面が
-   出てしまうため使わない。事前にこのショートカットを作成しておくこと。 */
+/* RaceChrono起動: iOSショートカット「RaceChrono」経由。
+   racechrono:// 直接はインポート画面になるため使わない */
 const RC_SHORTCUT_URL="shortcuts://run-shortcut?name="+encodeURIComponent("RaceChrono");
-function openRaceChrono(){
-  location.href=RC_SHORTCUT_URL;
-}
+function openRaceChrono(){location.href=RC_SHORTCUT_URL;}
 rcBtn.addEventListener("click",e=>{e.stopPropagation();openRaceChrono();});
 
-/* Wake Lock: 対応時は画面消灯を抑止。復帰時に再取得 */
+/* ===================== 走行前チェック(スクロール式) ===================== */
+const PRE_TITLE="7/19(日) 袖ヶ浦AM スポーツ走行チェックリスト";
+const PRE_SUBTITLE="3本走行版";
+const PRE_SET=[
+  ["空気圧① 真冷間の基準(参考)","フロント 1.8 / リア 1.7"],
+  ["空気圧② アクアライン到着直後にセット","**フロント 2.0 / リア 1.9**"],
+  ["空気圧③ 走行中の温間目標","**フロント 2.4 / リア 2.0**"],
+  ["減衰(変更なし)","**フロント 最強から5戻し / リア 最強から10戻し**"]
+];
+const PRE_NOTES=[
+  "空気圧は②で1回だけセット → 触らず走り出す → 1本目中盤の温間実測で③に合わせる。②は「温まった分を見込んだ冷間相当」で、真冷間で1.8を入れるのと同じ空気量(到着から1時間以内の出走なら誤差なし)。冷えて下がっても足さないこと(足すと入れすぎになる)。",
+  "★空気入れ必須(1本目中盤の温間合わせと、帰りの指定圧充填に使う)"
+];
+const PRE_SECTIONS=[
+  {title:"前日(7/18 土)",items:[
+    {t:"天気確認・雨なら延期",link:{label:"Yahoo!天気 袖ケ浦",url:"https://weather.yahoo.co.jp/weather/jp/12/4530/12229.html"}},
+    "エアゲージ+**空気入れ**の動作確認 ★",
+    "大きいカス(拾いもの)は剥がしてOK。**センターブロック端のめくれの深さを確認**: 軽く起こして根本を見る(浅い=表層でOK / ブロックごと浮く=欠ける前提で監視)。写真を撮る",
+    "エンジンオイル・冷却水・ブレーキフルード・パッド残量・ホイールナットの締め・燃料",
+    "荷物: ヘルメット / グローブ / 長袖長ズボン / 靴 / ライセンス / 飲料 / 牽引フック / 現金"
+  ]},
+  {title:"当日・現地に着いたら",items:[
+    "行きの高速はドアラベルの指定空気圧のまま走ってくる",
+    "到着直後に **フロント2.0 / リア1.9** へセット(1回だけ)。以降コースインまで触らない(冷えて下がっても足さない)",
+    "受付・走行手続き",
+    "車内の物とフロアマットを全部降ろす",
+    "牽引フックを装着",
+    "スマホをガッチリ固定(取り付けの向きをメモ)",
+    "空気入れとエアゲージをピットに置いておく"
+  ]},
+  {title:"コースイン直前(毎回共通)",items:[
+    "空気圧: 1本目は到着時セット(**フロント2.0/リア1.9**)のまま調整しない / 2本目・3本目は温間**フロント2.4/リア2.0**を確認",
+    "フロントのブロック端めくれをチラ見(急に進んでいないか。**底にコードが見えたら走行終了**)",
+    "ヘルメット・グローブ着用",
+    "**シートベルトを締めて、たるみを取る**",
+    "窓を全部閉める、ミラー位置確認",
+    "RaceChrono 記録スタート",
+    "減衰の確認は1本目のみ: **フロント最強から5戻し / リア最強から10戻し**"
+  ]},
+  {title:"1本目 = 慣らし+空気圧合わせ",items:[
+    "最初の2周はウォームアップ(タイムは見ない・ブレーキも様子見)",
+    "ウォームアップ中に5コーナー進入の目印を決める(1035m付近の看板・縁石など)",
+    "**開始10〜15分でピットイン → 温間を実測 → フロント2.4/リア2.0に合わせる**(足す・抜くどちらもあり得る)",
+    "残りはアタック2〜3周 → クールダウン1周 の繰り返し"
+  ]},
+  {title:"2本目 = アタック本命(温間2.4のまま)",items:[
+    "開始時に温間 **フロント2.4/リア2.0** を確認",
+    "アタック2〜3周 → クールダウン1周(タイムを狙うのはこの本が本命)",
+    "グリップ低下(タレ)を感じたらすぐ温間を実測(フロント2.6を超えていたら2.4まで抜く)",
+    "前が詰まったら1周捨てて間隔を作り直す"
+  ]},
+  {title:"3本目 = 練習(温間2.4のまま)",items:[
+    "開始時に温間 **フロント2.4/リア2.0** を確認",
+    "5コーナー進入の反復練習(決めた目印で毎周同じ操作)",
+    "暑い時間帯なのでクールダウン多め(上がっていたら2.4まで抜く)"
+  ]},
+  {title:"走行後",items:[
+    "1コーナー出口の跳ねが出たか・出なかったかをメモ",
+    "温間空気圧を記録(フロント/リア)",
+    "ブロック端めくれの進行を走行前の写真と比較(フロント/リア別・写真)",
+    "**タイヤ内部のコード(繊維)が見えたら、そのタイヤでは以後走らない**",
+    "**帰る前にドアラベルの指定空気圧まで充填**(1.8のままの高速はNG)",
+    "RaceChronoのログ保存を確認(後日ログから区間タイムの合否判定をする)"
+  ]}
+];
+const PRE_RULES={title:"走り方の約束(走行中はこれだけ守る)",items:[
+  "2コーナー: 旋回中はアクセルを戻さない(踏み足すか、そのまま固定)",
+  "4ヘアピン: 出口の速度優先(進入で突っ込まない)",
+  "5コーナー進入: 目印で軽く1回ブレーキ → 離しながらハンドルを切り始める。毎周同じに",
+  "前が詰まったら1周捨てる(無理に追わない)"
+]};
+const PRE_EXPLAIN={title:"今回の温間2.4について",text:"今回は終日フロント2.4で管理する。狙いは2つ: ①センターブロック端のめくれ(圧集中+熱のサイン)を進行させない ②1コーナー出口の跳ねを出さない。タイムとの関係は走行後にログを7/13と比較して判定する。当日は「跳ねが出たかどうか」だけ覚えておけばOK。"};
+
+const PRE_KEY="predrive_checked";
+let preChecks={};
+try{const o=JSON.parse(localStorage.getItem(PRE_KEY));if(o&&typeof o==="object")preChecks=o;}catch(e){}
+function savePreChecks(){try{localStorage.setItem(PRE_KEY,JSON.stringify(preChecks));}catch(e){}}
+
+const preBody=$("preBody");
+let preRows=[]; /* {key,el,box} リセット時の一括更新用 */
+let preBuilt=false;
+
+function makeRefCard(title,items,paragraph){
+  const h=document.createElement("div");h.className="preH";h.textContent=title;preBody.appendChild(h);
+  const card=document.createElement("div");card.className="refCard";
+  if(items){items.forEach(t=>{const d=document.createElement("div");d.className="rItem";d.appendChild(withEmph(t));card.appendChild(d);});}
+  if(paragraph){const p=document.createElement("div");p.appendChild(withEmph(paragraph));card.appendChild(p);}
+  preBody.appendChild(card);
+}
+
+function renderPre(){
+  if(preBuilt){refreshPre();return;}
+  preBody.textContent="";
+
+  const t=document.createElement("div");t.className="preTitle";t.textContent=PRE_TITLE;preBody.appendChild(t);
+  const st=document.createElement("div");st.className="preSubtitle";st.textContent=PRE_SUBTITLE;preBody.appendChild(st);
+
+  /* 今回のセット(参照) */
+  const setH=document.createElement("div");setH.className="preH";setH.textContent="今回のセット";preBody.appendChild(setH);
+  const setCard=document.createElement("div");setCard.className="setCard";
+  PRE_SET.forEach(([k,v])=>{
+    const row=document.createElement("div");row.className="setRow";
+    const ke=document.createElement("span");ke.className="k";ke.textContent=k;
+    const ve=document.createElement("span");ve.className="v";ve.appendChild(withEmph(v));
+    row.append(ke,ve);setCard.appendChild(row);
+  });
+  preBody.appendChild(setCard);
+  PRE_NOTES.forEach(n=>{const d=document.createElement("div");d.className="note";d.appendChild(withEmph(n));preBody.appendChild(d);});
+
+  /* チェック項目セクション */
+  PRE_SECTIONS.forEach((sec,si)=>{
+    const h=document.createElement("div");h.className="preH";h.textContent=sec.title;preBody.appendChild(h);
+    sec.items.forEach((item,ii)=>{
+      const key="s"+si+"i"+ii;
+      const obj=(typeof item==="string")?{t:item}:item;
+      const row=document.createElement("button");row.type="button";row.className="prow";
+      const box=document.createElement("span");box.className="pbox";
+      const label=document.createElement("span");label.className="plabel";
+      label.appendChild(withEmph(obj.t));
+      if(obj.link){
+        const a=document.createElement("a");a.className="plink";a.textContent=obj.link.label;
+        a.href=obj.link.url;a.target="_blank";a.rel="noopener";
+        a.addEventListener("pointerdown",e=>e.stopPropagation());
+        a.addEventListener("click",e=>e.stopPropagation());
+        label.appendChild(document.createElement("br"));
+        label.appendChild(a);
+      }
+      row.append(box,label);
+      onPress(row,()=>togglePre(key));
+      preBody.appendChild(row);
+      preRows.push({key:key,el:row,box:box});
+    });
+  });
+
+  /* 参照ブロック */
+  makeRefCard(PRE_RULES.title,PRE_RULES.items,null);
+  makeRefCard(PRE_EXPLAIN.title,null,PRE_EXPLAIN.text);
+
+  const clear=document.createElement("button");clear.type="button";clear.className="clearBtn";
+  clear.textContent="チェックをすべてクリア";
+  onPress(clear,()=>askConfirm("走行前チェックを\nすべてクリアしますか?","はい、クリアする",clearPre));
+  preBody.appendChild(clear);
+
+  preBuilt=true;
+  refreshPre();
+}
+function refreshPre(){
+  preRows.forEach(r=>{
+    const on=!!preChecks[r.key];
+    r.el.classList.toggle("pdone",on);
+    r.box.textContent=on?"✓":"";
+  });
+}
+function togglePre(key){
+  if(preChecks[key])delete preChecks[key];else preChecks[key]=true;
+  savePreChecks();
+  if(navigator.vibrate){try{navigator.vibrate(15);}catch(e){}}
+  refreshPre();
+}
+function clearPre(){
+  preChecks={};savePreChecks();refreshPre();
+}
+
+/* ===================== メニュー配線 ===================== */
+onPress($("toPre"),()=>showScreen("pre"));
+onPress($("toApp"),()=>showScreen("app"));
+onPress($("toMenuApp"),()=>showScreen("menu"));
+onPress($("toMenuPre"),()=>showScreen("menu"));
+
+/* ===================== 共通 ===================== */
 let wakeLock=null;
 async function requestWakeLock(){
   if(!("wakeLock" in navigator))return;
@@ -364,18 +601,16 @@ document.addEventListener("visibilitychange",()=>{
 window.addEventListener("pointerdown",()=>requestWakeLock(),{once:true});
 requestWakeLock();
 
-/* 誤操作対策: ピンチ・ダブルタップズームを抑止 */
 document.addEventListener("gesturestart",e=>e.preventDefault());
 window.addEventListener("dblclick",e=>e.preventDefault());
 
-/* オフライン対応: Service Worker登録(ホスティング環境でのみ有効。ローカルやプレビューでは黙って無視される) */
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>{
     navigator.serviceWorker.register("./sw.js").catch(()=>{});
   });
 }
 
-render(false);
+showScreen("menu");
 </script>
 </body>
 </html>
