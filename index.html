@@ -75,8 +75,8 @@ body.final .item.done .box{background:#fff;border-color:#fff;color:var(--red);}
 #nextStintBtn{display:none;min-height:56px;padding:12px 20px;border:none;border-radius:14px;background:#fff;color:var(--red);font-size:1.2rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
-/* フッター: 戻る(全幅) */
-footer{display:flex;}
+/* フッター: 戻る(全幅)。チェック項目との間に緩衝地帯を設けて誤タップを防ぐ */
+footer{display:flex;margin-top:32px;}
 #backBtn{flex:2;min-height:80px;padding:18px 28px;font-size:1.6rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:18px;}
 #backBtn:disabled{opacity:.35;cursor:default;}
 
@@ -94,7 +94,7 @@ body.final #resetBtn{display:none;}
 body.final #nextStintBtn{display:inline-block;}
 
 /* リセット確認の全画面2択。ボタンが画面を半分ずつ使う */
-#confirmOverlay{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;gap:20px;
+#confirmOverlay{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;gap:30px;
   background:var(--bg);color:var(--navy);
   padding:calc(env(safe-area-inset-top) + 24px)
           calc(env(safe-area-inset-right) + 20px)
