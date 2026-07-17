@@ -62,8 +62,8 @@ main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;t
 /* .item = タップ判定(縦スペースを等分したスロット全体)。
    .card = 見た目(コンパクト)。判定は広く、見た目は離して押し分けやすく */
 .item{flex:1;min-height:104px;display:flex;flex-direction:column;justify-content:center;
-  width:100%;background:none;border:none;padding:4px 0;}
-.item .card{display:flex;align-items:center;gap:18px;width:100%;min-height:92px;padding:14px 22px;
+  width:100%;background:none;border:none;padding:5px 0;}
+.item .card{flex:1;display:flex;align-items:center;gap:18px;width:100%;min-height:92px;padding:14px 22px;
   border:2.5px solid rgba(102,112,122,.35);border-radius:22px;background:#fff;
   font-size:clamp(1.5rem,6.4vw,2rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
 .item .box{flex:0 0 auto;width:56px;height:56px;border-radius:50%;border:3.5px solid rgba(102,112,122,.5);
@@ -318,7 +318,8 @@ onPress(confirmNo,()=>{
   confirmOverlay.classList.remove("show");
 });
 onPress(resetBtn,()=>askReset("1ページ目に戻しますか?"));
-onPress(nextStintBtn,()=>askReset("次のスティントの準備\nチェックを1ページ目に戻しますか?"));
+/* 次のスティントへ: 最終ページ=全チェック完了後なので確認なしで即リセット */
+onPress(nextStintBtn,()=>resetAll());
 
 /* RaceChrono起動: iOSショートカット「RaceChrono」
    (アクション: Appを開く → RaceChrono)経由で開く。
