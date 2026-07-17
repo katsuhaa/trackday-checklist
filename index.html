@@ -73,8 +73,6 @@ body.final .item.done .box{background:#fff;border-color:#fff;color:var(--red);}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
 /* 次のスティントへ: 最終ページの右上(最初からの位置)に表示。チェック項目から離して誤タップを防ぐ */
 #nextStintBtn{display:none;min-height:56px;padding:12px 20px;border:none;border-radius:14px;background:#fff;color:var(--red);font-size:1.2rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
-/* リセット系ボタンの2度押し確認中の見た目 */
-#resetBtn.arm,#nextStintBtn.arm{background:var(--navy);color:#fff;border-color:var(--navy);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
 /* フッター: 戻る(全幅) */
@@ -235,12 +233,15 @@ function confirmFx(){
    全項目チェックで少し間を置いて次ページへ自動遷移。
    最終ページは全チェックでRaceChronoを起動 */
 let advanceTimer=null;
+function cancelAdvance(){
+  if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
+}
 function toggleItem(idx){
   checked[idx]=!checked[idx];
   saveChecks();
   if(navigator.vibrate){try{navigator.vibrate(20);}catch(e){}}
   render(false);
-  if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
+  cancelAdvance();
   if(checked.every(Boolean)){
     advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},350);
   }
@@ -253,34 +254,23 @@ function completePage(){
   confirmFx();
   render(true);
 }
-function prev(){if(i>0){i--;checked=freshChecks();saveChecks();render(true);}}
-function resetAll(){i=0;checked=freshChecks();saveChecks();render(true);}
+/* 戻る/リセットは保留中の自動遷移タイマーを必ず破棄する
+   (全チェック直後0.35秒の間に押されても誤って進まないように) */
+function prev(){if(i>0){cancelAdvance();i--;checked=freshChecks();saveChecks();render(true);}}
+function resetAll(){cancelAdvance();i=0;checked=freshChecks();saveChecks();render(true);}
 
 backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
 
-/* 誤操作防止: リセット系ボタンは2度押し確認式。
-   1回目で「もう一度でリセット」に変わり、2.5秒以内の2回目だけ実行 */
-function armButton(btn,action){
-  const label=btn.textContent;
-  let timer=null;
-  btn.addEventListener("click",e=>{
-    e.stopPropagation();
-    if(timer){
-      clearTimeout(timer);timer=null;
-      btn.textContent=label;btn.classList.remove("arm");
-      action();
-      return;
-    }
-    btn.textContent="もう一度でリセット";
-    btn.classList.add("arm");
-    timer=setTimeout(()=>{
-      timer=null;
-      btn.textContent=label;btn.classList.remove("arm");
-    },2500);
-  });
-}
-armButton(resetBtn,resetAll);
-armButton(nextStintBtn,resetAll);
+/* 誤操作防止: リセット系ボタンはOS標準の確認ダイアログを挟む。
+   「キャンセル」でやめられ、「OK」のときだけ実行される */
+resetBtn.addEventListener("click",e=>{
+  e.stopPropagation();
+  if(confirm("1ページ目に戻します。よろしいですか?"))resetAll();
+});
+nextStintBtn.addEventListener("click",e=>{
+  e.stopPropagation();
+  if(confirm("次のスティントの準備を始めます。\nチェックを1ページ目に戻します。よろしいですか?"))resetAll();
+});
 
 /* RaceChrono起動: iOSショートカット「RaceChrono」
    (アクション: Appを開く → RaceChrono)経由で開く。
