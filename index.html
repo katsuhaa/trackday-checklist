@@ -93,6 +93,19 @@ body.final #backBtn{color:#fff;border-color:rgba(255,255,255,.6);}
 body.final #resetBtn{display:none;}
 body.final #nextStintBtn{display:inline-block;}
 
+/* リセット確認の全画面2択。ボタンが画面を半分ずつ使う */
+#confirmOverlay{position:fixed;inset:0;z-index:20;display:none;flex-direction:column;gap:20px;
+  background:var(--bg);color:var(--navy);
+  padding:calc(env(safe-area-inset-top) + 24px)
+          calc(env(safe-area-inset-right) + 20px)
+          calc(env(safe-area-inset-bottom) + 20px)
+          calc(env(safe-area-inset-left) + 20px);}
+#confirmOverlay.show{display:flex;}
+#confirmTitle{font-size:clamp(1.5rem,6.5vw,2rem);font-weight:800;text-align:center;line-height:1.4;white-space:pre-line;}
+#confirmYes,#confirmNo{flex:1;border-radius:26px;font-size:clamp(1.6rem,7vw,2.2rem);font-weight:800;}
+#confirmYes{background:var(--red);color:#fff;border:none;}
+#confirmNo{background:#fff;color:var(--navy);border:3px solid rgba(102,112,122,.45);}
+
 /* タップ確認の緑フラッシュ */
 #flash{position:fixed;inset:0;background:var(--green);opacity:0;pointer-events:none;z-index:10;}
 #flash.on{animation:flashfade .32s ease-out;}
@@ -133,6 +146,13 @@ body.final #nextStintBtn{display:inline-block;}
   </footer>
 </div>
 <div id="flash"></div>
+
+<!-- リセット確認: 全画面・巨大2択(車内でも押し間違えない) -->
+<div id="confirmOverlay">
+  <div id="confirmTitle"></div>
+  <button id="confirmYes" type="button">はい、1ページ目に戻す</button>
+  <button id="confirmNo" type="button">やめる</button>
+</div>
 
 <script>
 "use strict";
@@ -261,15 +281,30 @@ function resetAll(){cancelAdvance();i=0;checked=freshChecks();saveChecks();rende
 
 backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
 
-/* 誤操作防止: リセット系ボタンはOS標準の確認ダイアログを挟む。
-   「キャンセル」でやめられ、「OK」のときだけ実行される */
+/* 誤操作防止: リセット系ボタンは全画面の巨大2択で確認する。
+   小さいダイアログは車内で押せないため使わない */
+const confirmOverlay=$("confirmOverlay"), confirmTitle=$("confirmTitle"),
+      confirmYes=$("confirmYes"), confirmNo=$("confirmNo");
+function askReset(title){
+  confirmTitle.textContent=title;
+  confirmOverlay.classList.add("show");
+}
+confirmYes.addEventListener("click",e=>{
+  e.stopPropagation();
+  confirmOverlay.classList.remove("show");
+  resetAll();
+});
+confirmNo.addEventListener("click",e=>{
+  e.stopPropagation();
+  confirmOverlay.classList.remove("show");
+});
 resetBtn.addEventListener("click",e=>{
   e.stopPropagation();
-  if(confirm("1ページ目に戻します。よろしいですか?"))resetAll();
+  askReset("1ページ目に戻しますか?");
 });
 nextStintBtn.addEventListener("click",e=>{
   e.stopPropagation();
-  if(confirm("次のスティントの準備を始めます。\nチェックを1ページ目に戻します。よろしいですか?"))resetAll();
+  askReset("次のスティントの準備\nチェックを1ページ目に戻しますか?");
 });
 
 /* RaceChrono起動: iOSショートカット「RaceChrono」
