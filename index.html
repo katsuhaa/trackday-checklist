@@ -51,15 +51,16 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
 
 /* 中央: フェーズ名 / 番号 / 手順 / 補足 */
 main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
-#phase{font-size:1.15rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:6px;}
-#num{font-size:clamp(3rem,15vw,4.6rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
+/* フェーズ名と番号はコンパクトにして、チェックボタンに画面を最大限使う */
+#phase{font-size:1.1rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:2px;}
+#num{font-size:clamp(1.8rem,7vw,2.4rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
 /* 各項目 = チェックボックス付きの大きなボタン。全項目同じ大きさで押し間違いを防ぐ */
-#text{display:flex;flex-direction:column;gap:12px;margin-top:18px;width:100%;max-width:560px;}
-.item{display:flex;align-items:center;gap:16px;width:100%;min-height:92px;padding:16px 20px;
-  border:2px solid rgba(102,112,122,.35);border-radius:18px;background:#fff;
-  font-size:clamp(1.3rem,5.4vw,1.8rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
-.item .box{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:3px solid rgba(102,112,122,.5);
-  display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#fff;}
+#text{display:flex;flex-direction:column;gap:14px;margin-top:14px;width:100%;max-width:560px;}
+.item{display:flex;align-items:center;gap:18px;width:100%;min-height:120px;padding:18px 22px;
+  border:2.5px solid rgba(102,112,122,.35);border-radius:22px;background:#fff;
+  font-size:clamp(1.5rem,6.6vw,2.1rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
+.item .box{flex:0 0 auto;width:56px;height:56px;border-radius:50%;border:3px solid rgba(102,112,122,.5);
+  display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;}
 .item .label{flex:1;overflow-wrap:anywhere;}
 .item.done{border-color:var(--green);background:rgba(30,138,76,.08);}
 .item.done .box{background:var(--green);border-color:var(--green);}
@@ -67,12 +68,15 @@ body.final .item{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,
 body.final .item.done{background:rgba(255,255,255,.28);border-color:#fff;}
 body.final .item.done .box{background:#fff;border-color:#fff;color:var(--red);}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
-#nextStintBtn{display:none;margin-top:32px;padding:24px 44px;border:none;border-radius:18px;background:#fff;color:var(--red);font-size:1.6rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+/* 次のスティントへ: 最終ページの右上(最初からの位置)に表示。チェック項目から離して誤タップを防ぐ */
+#nextStintBtn{display:none;min-height:56px;padding:12px 20px;border:none;border-radius:14px;background:#fff;color:var(--red);font-size:1.2rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
+/* リセット系ボタンの2度押し確認中の見た目 */
+#resetBtn.arm,#nextStintBtn.arm{background:var(--navy);color:#fff;border-color:var(--navy);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
 
 /* フッター: 戻る(全幅) */
 footer{display:flex;}
-#backBtn{flex:2;min-height:72px;padding:16px 28px;font-size:1.5rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:16px;}
+#backBtn{flex:2;min-height:80px;padding:18px 28px;font-size:1.6rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:18px;}
 #backBtn:disabled{opacity:.35;cursor:default;}
 
 /* 最終項目「出発!」= 全画面赤 */
@@ -109,6 +113,7 @@ body.final #nextStintBtn{display:inline-block;}
     <div id="headerRow">
       <div id="counter">1 / 7</div>
       <button id="resetBtn" type="button">最初から</button>
+      <button id="nextStintBtn" type="button">次のスティントへ</button>
     </div>
   </header>
 
@@ -119,7 +124,6 @@ body.final #nextStintBtn{display:inline-block;}
       <div id="text"></div>
       <div id="sub"></div>
       <button id="rcBtn" type="button">RaceChronoを開く</button>
-      <button id="nextStintBtn" type="button">次のスティントへ</button>
     </div>
   </main>
 
@@ -250,8 +254,30 @@ function prev(){if(i>0){i--;checked=freshChecks();saveChecks();render(true);}}
 function resetAll(){i=0;checked=freshChecks();saveChecks();render(true);}
 
 backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
-resetBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
-nextStintBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
+
+/* 誤操作防止: リセット系ボタンは2度押し確認式。
+   1回目で「もう一度でリセット」に変わり、2.5秒以内の2回目だけ実行 */
+function armButton(btn,action){
+  const label=btn.textContent;
+  let timer=null;
+  btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    if(timer){
+      clearTimeout(timer);timer=null;
+      btn.textContent=label;btn.classList.remove("arm");
+      action();
+      return;
+    }
+    btn.textContent="もう一度でリセット";
+    btn.classList.add("arm");
+    timer=setTimeout(()=>{
+      timer=null;
+      btn.textContent=label;btn.classList.remove("arm");
+    },2500);
+  });
+}
+armButton(resetBtn,resetAll);
+armButton(nextStintBtn,resetAll);
 
 /* RaceChrono起動: iOSショートカット「RaceChrono」
    (アクション: Appを開く → RaceChrono)経由で開く。
