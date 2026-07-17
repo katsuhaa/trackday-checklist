@@ -204,6 +204,19 @@ function saveChecks(){
 let checked=loadChecks();
 
 const $=id=>document.getElementById(id);
+
+/* 触れた瞬間(pointerdown)に反応させる。クリック判定だと指が少し
+   滑っただけでドラッグ扱いになり押下が無効化されるため。
+   PointerEvent非対応環境ではclickにフォールバック */
+function onPress(el,fn){
+  const type=window.PointerEvent?"pointerdown":"click";
+  el.addEventListener(type,ev=>{
+    if(ev.pointerType==="mouse"&&ev.button!==0)return;
+    ev.stopPropagation();
+    ev.preventDefault();
+    fn(ev);
+  });
+}
 const counterEl=$("counter"), fillEl=$("progressFill"),
       phaseEl=$("phase"), numEl=$("num"), textEl=$("text"), subEl=$("sub"),
       stepBox=$("stepBox"), backBtn=$("backBtn"), resetBtn=$("resetBtn"),
@@ -232,7 +245,7 @@ function render(animate){
     card.className="card";
     card.append(box,label);
     btn.append(card);
-    btn.addEventListener("click",ev=>{ev.stopPropagation();toggleItem(idx);});
+    onPress(btn,()=>toggleItem(idx));
     textEl.appendChild(btn);
   });
   if(s.sub){subEl.textContent=s.sub;subEl.style.display="";}
@@ -270,7 +283,8 @@ function toggleItem(idx){
   render(false);
   cancelAdvance();
   if(checked.every(Boolean)){
-    advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},350);
+    /* 最後の✓を目で確認できるよう0.8秒おいて次ページへ */
+    advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},800);
   }
 }
 function completePage(){
@@ -282,11 +296,11 @@ function completePage(){
   render(true);
 }
 /* 戻る/リセットは保留中の自動遷移タイマーを必ず破棄する
-   (全チェック直後0.35秒の間に押されても誤って進まないように) */
+   (全チェック直後の待ち時間中に押されても誤って進まないように) */
 function prev(){if(i>0){cancelAdvance();i--;checked=freshChecks();saveChecks();render(true);}}
 function resetAll(){cancelAdvance();i=0;checked=freshChecks();saveChecks();render(true);}
 
-backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
+onPress(backBtn,()=>prev());
 
 /* 誤操作防止: リセット系ボタンは全画面の巨大2択で確認する。
    小さいダイアログは車内で押せないため使わない */
@@ -296,23 +310,15 @@ function askReset(title){
   confirmTitle.textContent=title;
   confirmOverlay.classList.add("show");
 }
-confirmYes.addEventListener("click",e=>{
-  e.stopPropagation();
+onPress(confirmYes,()=>{
   confirmOverlay.classList.remove("show");
   resetAll();
 });
-confirmNo.addEventListener("click",e=>{
-  e.stopPropagation();
+onPress(confirmNo,()=>{
   confirmOverlay.classList.remove("show");
 });
-resetBtn.addEventListener("click",e=>{
-  e.stopPropagation();
-  askReset("1ページ目に戻しますか?");
-});
-nextStintBtn.addEventListener("click",e=>{
-  e.stopPropagation();
-  askReset("次のスティントの準備\nチェックを1ページ目に戻しますか?");
-});
+onPress(resetBtn,()=>askReset("1ページ目に戻しますか?"));
+onPress(nextStintBtn,()=>askReset("次のスティントの準備\nチェックを1ページ目に戻しますか?"));
 
 /* RaceChrono起動: iOSショートカット「RaceChrono」
    (アクション: Appを開く → RaceChrono)経由で開く。
