@@ -53,9 +53,19 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
 main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
 #phase{font-size:1.15rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:6px;}
 #num{font-size:clamp(3rem,15vw,4.6rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
-#text{font-size:clamp(1.8rem,8.5vw,3.1rem);font-weight:800;line-height:1.32;margin-top:10px;max-width:100%;overflow-wrap:anywhere;text-wrap:balance;}
-/* 動作ごとの行(\n区切り)の間にだけ余白を入れる。折り返しの行間は変えない */
-#text .line + .line{margin-top:.6em;}
+/* 各項目 = チェックボックス付きの大きなボタン。全項目同じ大きさで押し間違いを防ぐ */
+#text{display:flex;flex-direction:column;gap:12px;margin-top:18px;width:100%;max-width:560px;}
+.item{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;padding:12px 18px;
+  border:2px solid rgba(102,112,122,.35);border-radius:16px;background:#fff;
+  font-size:clamp(1.15rem,4.8vw,1.6rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
+.item .box{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:2.5px solid rgba(102,112,122,.5);
+  display:flex;align-items:center;justify-content:center;font-size:1.35rem;font-weight:800;color:#fff;}
+.item .label{flex:1;overflow-wrap:anywhere;}
+.item.done{border-color:var(--green);background:rgba(30,138,76,.08);}
+.item.done .box{background:var(--green);border-color:var(--green);}
+body.final .item{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.55);color:#fff;}
+body.final .item.done{background:rgba(255,255,255,.28);border-color:#fff;}
+body.final .item.done .box{background:#fff;border-color:#fff;color:var(--red);}
 #sub{font-size:1.3rem;font-weight:600;color:var(--gray);line-height:1.5;margin-top:14px;}
 #nextStintBtn{display:none;margin-top:32px;padding:24px 44px;border:none;border-radius:18px;background:#fff;color:var(--red);font-size:1.6rem;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,.18);}
 #rcBtn{display:none;margin-top:26px;padding:18px 34px;border:none;border-radius:16px;background:var(--green);color:#fff;font-size:1.35rem;font-weight:800;box-shadow:0 4px 14px rgba(30,138,76,.35);}
@@ -133,9 +143,10 @@ const STEPS=[
   {phase:"出発",     text:"窓ガラスを開ける\n走行券を取り出す\nタップでRaceChrono起動して出発!"}
 ];
 
-/* 現在ステップを保存し、次回開いたとき続きから再開
+/* 現在ステップとチェック状態を保存し、次回開いたとき続きから再開
    (localStorageが使えない環境=プレビュ等では従来どおりメモリのみ) */
 const STORE_KEY="checklist_step";
+const CHECK_KEY="checklist_checked";
 function loadStep(){
   try{
     const v=parseInt(localStorage.getItem(STORE_KEY),10);
@@ -147,6 +158,21 @@ function saveStep(){
   try{localStorage.setItem(STORE_KEY,String(i));}catch(e){}
 }
 let i=loadStep();
+
+function itemsOf(step){return step.text.split("\n");}
+function freshChecks(){return itemsOf(STEPS[i]).map(()=>false);}
+function loadChecks(){
+  try{
+    const a=JSON.parse(localStorage.getItem(CHECK_KEY));
+    /* 項目数が一致し、かつ未完了のときだけ復元(全部✓の状態は復元しない=安全側) */
+    if(Array.isArray(a)&&a.length===itemsOf(STEPS[i]).length&&a.some(v=>!v))return a.map(Boolean);
+  }catch(e){}
+  return freshChecks();
+}
+function saveChecks(){
+  try{localStorage.setItem(CHECK_KEY,JSON.stringify(checked));}catch(e){}
+}
+let checked=loadChecks();
 
 const $=id=>document.getElementById(id);
 const counterEl=$("counter"), fillEl=$("progressFill"),
@@ -161,13 +187,21 @@ function render(animate){
   fillEl.style.width=((i+1)/n*100)+"%";
   phaseEl.textContent=s.phase;
   numEl.textContent=i+1;
-  /* \n区切りの各動作を行ブロックにして、行間の余白をCSSで制御する */
+  /* 各項目をチェックボックス付きボタンとして描画 */
   textEl.textContent="";
-  s.text.split("\n").forEach(line=>{
-    const div=document.createElement("div");
-    div.className="line";
-    div.textContent=line;
-    textEl.appendChild(div);
+  itemsOf(s).forEach((line,idx)=>{
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.className="item"+(checked[idx]?" done":"");
+    const box=document.createElement("span");
+    box.className="box";
+    box.textContent=checked[idx]?"✓":"";
+    const label=document.createElement("span");
+    label.className="label";
+    label.textContent=line;
+    btn.append(box,label);
+    btn.addEventListener("click",ev=>{ev.stopPropagation();toggleItem(idx);});
+    textEl.appendChild(btn);
   });
   if(s.sub){subEl.textContent=s.sub;subEl.style.display="";}
   else{subEl.style.display="none";}
@@ -190,17 +224,31 @@ function confirmFx(){
   if(navigator.vibrate){try{navigator.vibrate(25);}catch(e){}}
 }
 
-function next(){
-  if(i>=STEPS.length-1){openRaceChrono();return;} /* 最終画面: 内容を読んでから素手でタップ→RaceChrono起動。以後は戻ってこなくてよい */
+/* 項目タップ=チェックの切り替え(もう一度押せば解除できる)。
+   全項目チェックで少し間を置いて次ページへ自動遷移。
+   最終ページは全チェックでRaceChronoを起動 */
+let advanceTimer=null;
+function toggleItem(idx){
+  checked[idx]=!checked[idx];
+  saveChecks();
+  if(navigator.vibrate){try{navigator.vibrate(20);}catch(e){}}
+  render(false);
+  if(advanceTimer){clearTimeout(advanceTimer);advanceTimer=null;}
+  if(checked.every(Boolean)){
+    advanceTimer=setTimeout(()=>{advanceTimer=null;completePage();},350);
+  }
+}
+function completePage(){
+  if(i>=STEPS.length-1){openRaceChrono();return;}
   i++;
+  checked=freshChecks();
+  saveChecks();
   confirmFx();
   render(true);
 }
-function prev(){if(i>0){i--;render(true);}}
-function resetAll(){i=0;render(true);}
+function prev(){if(i>0){i--;checked=freshChecks();saveChecks();render(true);}}
+function resetAll(){i=0;checked=freshChecks();saveChecks();render(true);}
 
-/* 画面のどこをタップしても次へ(ボタンは除く) */
-appEl.addEventListener("click",next);
 backBtn.addEventListener("click",e=>{e.stopPropagation();prev();});
 resetBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});
 nextStintBtn.addEventListener("click",e=>{e.stopPropagation();resetAll();});

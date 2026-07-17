@@ -21,8 +21,12 @@
 - RaceChrono の起動は `shortcuts://run-shortcut?name=RaceChrono`
   (iOSショートカット経由)。`racechrono://` 直接はインポート画面に
   なるため使用禁止。
-- 最終画面(赤)は「読んでから素手でタップ→RaceChrono起動→戻らずに
-  そのまま走行」の流れ。最終画面のタップは openRaceChrono() を呼ぶ。
+- 各ページはチェックボックス式: 項目ボタンをタップで✓(再タップで解除)。
+  **全項目チェックで次ページへ自動遷移**。画面タップで進む方式は廃止済み。
+- 最終画面(赤)は全項目チェックで openRaceChrono() を呼び、
+  「素手でチェック→RaceChrono起動→戻らずにそのまま走行」の流れ。
+- チェック状態は localStorage(checklist_checked)に保存。全✓状態は
+  復元しない(安全側に倒して再確認させる)。
 
 ## 技術ルール
 
