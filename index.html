@@ -49,18 +49,21 @@ button{font:inherit;cursor:pointer;background:none;color:inherit;}
 #counter{font-size:1.15rem;font-weight:700;color:var(--gray);font-variant-numeric:tabular-nums;letter-spacing:.04em;}
 #resetBtn{min-height:56px;padding:12px 20px;font-size:1.2rem;font-weight:700;color:var(--gray);border:2px solid rgba(102,112,122,.45);border-radius:14px;}
 
-/* 中央: フェーズ名 / 番号 / 手順 / 補足 */
-main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+/* 中央: フェーズ名 / 番号 / 手順 / 補足
+   チェックボタンが縦の空きスペースをすべて使って広がるレイアウト */
+main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;text-align:center;}
+#stepBox{flex:1;min-height:0;width:100%;max-width:560px;display:flex;flex-direction:column;}
 /* フェーズ名と番号はコンパクトにして、チェックボタンに画面を最大限使う */
 #phase{font-size:1.1rem;font-weight:700;color:var(--green);letter-spacing:.2em;margin-bottom:2px;}
 #num{font-size:clamp(1.8rem,7vw,2.4rem);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;}
-/* 各項目 = チェックボックス付きの大きなボタン。全項目同じ大きさで押し間違いを防ぐ */
-#text{display:flex;flex-direction:column;gap:14px;margin-top:14px;width:100%;max-width:560px;}
-.item{display:flex;align-items:center;gap:18px;width:100%;min-height:120px;padding:18px 22px;
+/* 各項目 = チェックボックス付きの大きなボタン。
+   flex:1 で縦の空きスペースを等分し、常に最大サイズ・全項目同じ大きさになる */
+#text{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;margin:12px 0;width:100%;}
+.item{flex:1;display:flex;align-items:center;gap:18px;width:100%;min-height:100px;padding:16px 22px;
   border:2.5px solid rgba(102,112,122,.35);border-radius:22px;background:#fff;
-  font-size:clamp(1.5rem,6.6vw,2.1rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
-.item .box{flex:0 0 auto;width:56px;height:56px;border-radius:50%;border:3px solid rgba(102,112,122,.5);
-  display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;}
+  font-size:clamp(1.6rem,7vw,2.2rem);font-weight:700;line-height:1.3;text-align:left;color:var(--navy);}
+.item .box{flex:0 0 auto;width:60px;height:60px;border-radius:50%;border:3.5px solid rgba(102,112,122,.5);
+  display:flex;align-items:center;justify-content:center;font-size:2.1rem;font-weight:800;color:#fff;}
 .item .label{flex:1;overflow-wrap:anywhere;}
 .item.done{border-color:var(--green);background:rgba(30,138,76,.08);}
 .item.done .box{background:var(--green);border-color:var(--green);}
