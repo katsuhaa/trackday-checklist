@@ -1,9 +1,10 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v48";
+const CACHE = "checklist-v49";
 const ASSETS = [
   "./",
   "./index.html",
+  "./pre.html",
   "./manifest.json",
   "./icon-180.png",
   "./icon-192.png",
@@ -29,9 +30,11 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
 
-  /* ページ本体はネットワーク優先(最新をすぐ反映)。
-     2.5秒以内に取れない・圏外のときはキャッシュで表示 */
-  if (e.request.mode === "navigate") {
+  /* アプリ本体(index.html)だけネットワーク優先で最新を即反映。
+     pre.html は iframe のサブ文書なのでシェル扱いにしない
+     (ここでネットワーク優先にすると index.html のキャッシュを上書きしてしまう) */
+  const isSubDoc = /pre\.html$/.test(new URL(e.request.url).pathname);
+  if (e.request.mode === "navigate" && !isSubDoc) {
     /* 毎回ユニークなクエリを付けてCDN・HTTPキャッシュを完全に素通りし、
        デプロイ直後でも即座に最新を取得する */
     const bustURL = new URL(e.request.url);

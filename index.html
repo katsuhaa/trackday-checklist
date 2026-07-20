@@ -130,7 +130,7 @@ body.advancing{background:#E4F3E9;}
   #flash.on{animation-duration:.15s;}
 }
 
-/* ===== 走行前チェック(スクロール式・車外で使う) ===== */
+/* ===== 走行前チェック(pre.html を iframe 表示) ===== */
 #pre{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;}
 .preBar{display:flex;align-items:center;gap:12px;flex:0 0 auto;
   background:var(--navy);color:#fff;
@@ -138,39 +138,7 @@ body.advancing{background:#E4F3E9;}
           calc(env(safe-area-inset-right) + 16px) 12px
           calc(env(safe-area-inset-left) + 16px);}
 .preBar .menuLink{border-color:rgba(255,255,255,.55);color:#fff;}
-.preBarTitle{font-size:1.3rem;font-weight:800;}
-.preBody{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:16px calc(env(safe-area-inset-right) + 16px)
-          calc(env(safe-area-inset-bottom) + 48px)
-          calc(env(safe-area-inset-left) + 16px);}
-.preTitle{font-size:1.45rem;font-weight:800;line-height:1.35;}
-.preSubtitle{font-size:1.05rem;font-weight:700;color:var(--gray);margin:4px 0 4px;}
-.preH{font-size:1.25rem;font-weight:800;color:var(--green);margin:24px 0 12px;
-  padding-bottom:6px;border-bottom:2px solid rgba(30,138,76,.3);}
-.setCard{background:#fff;border:2px solid rgba(102,112,122,.25);border-radius:14px;padding:4px 14px;margin-top:8px;}
-.setRow{display:flex;justify-content:space-between;gap:14px;padding:11px 0;
-  border-bottom:1px solid rgba(102,112,122,.16);font-size:1.02rem;line-height:1.4;}
-.setRow:last-child{border-bottom:none;}
-.setRow .k{color:var(--gray);font-weight:600;flex:1;}
-.setRow .v{font-weight:700;text-align:right;flex:1;}
-.note{background:#FFF6E5;border:2px solid #F0C36D;border-radius:12px;padding:12px 14px;margin-top:12px;
-  font-size:1.05rem;line-height:1.55;font-weight:600;}
-.prow{display:flex;align-items:flex-start;gap:14px;width:100%;min-height:66px;padding:14px;
-  border:2px solid rgba(102,112,122,.3);border-radius:14px;background:#fff;margin-bottom:10px;
-  font-size:1.15rem;font-weight:600;line-height:1.45;text-align:left;color:var(--navy);}
-.prow .pbox{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:2.5px solid rgba(102,112,122,.5);
-  display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:#fff;margin-top:1px;}
-.prow .plabel{flex:1;overflow-wrap:anywhere;}
-.prow.pdone{border-color:var(--green);background:rgba(30,138,76,.08);}
-.prow.pdone .pbox{background:var(--green);border-color:var(--green);}
-.plink{display:inline-block;margin-top:8px;color:var(--green);font-weight:800;
-  text-decoration:underline;font-size:1.05rem;}
-.refCard{background:#fff;border:2px solid rgba(102,112,122,.25);border-radius:14px;
-  padding:14px 16px;margin-top:10px;font-size:1.05rem;line-height:1.6;}
-.refCard .rItem{margin:8px 0;padding-left:16px;position:relative;}
-.refCard .rItem::before{content:"・";position:absolute;left:0;color:var(--gray);}
-.clearBtn{width:100%;min-height:60px;margin-top:26px;border:2px solid rgba(176,48,40,.5);
-  border-radius:14px;color:var(--red);font-size:1.15rem;font-weight:700;background:#fff;}
+#preFrame{flex:1;min-height:0;width:100%;border:0;background:#f6f8fb;}
 </style>
 </head>
 <body>
@@ -180,7 +148,7 @@ body.advancing{background:#E4F3E9;}
   <div id="menuTitle">走行日チェックリスト</div>
   <button id="toPre" class="menuBtn" type="button">
     <span class="mBig">走行前チェック</span>
-    <span class="mSub">前日〜コースイン前の準備・空気圧・走り方</span>
+    <span class="mSub">持ち物・セット・各本の記録(減衰・空気圧・タイム)</span>
   </button>
   <button id="toApp" class="menuBtn" type="button">
     <span class="mBig">出走前チェック</span>
@@ -215,13 +183,12 @@ body.advancing{background:#E4F3E9;}
   </footer>
 </div>
 
-<!-- 走行前チェック(スクロール式) -->
+<!-- 走行前チェック: 別ファイル pre.html を iframe で表示(内容は独立して差し替え可能) -->
 <div id="pre">
   <div class="preBar">
     <button id="toMenuPre" class="menuLink" type="button">≡ メニュー</button>
-    <div class="preBarTitle">走行前チェック</div>
   </div>
-  <div class="preBody" id="preBody"></div>
+  <iframe id="preFrame" src="pre.html" title="走行前チェック"></iframe>
 </div>
 
 <div id="flash"></div>
@@ -270,7 +237,7 @@ function showScreen(name){
   preEl.style.display =(name==="pre") ?"flex":"none";
   if(name!=="app")document.body.classList.remove("final","advancing");
   if(name==="app")render(false);
-  if(name==="pre"){renderPre();$("preBody").scrollTop=0;}
+  /* 走行前チェック(#pre)は pre.html の iframe。状態はiframe内に保持される */
 }
 
 /* ===================== 出走前チェック(車内) ===================== */
@@ -419,169 +386,6 @@ onPress(nextStintBtn,()=>resetAll());
 const RC_SHORTCUT_URL="shortcuts://run-shortcut?name="+encodeURIComponent("RaceChrono");
 function openRaceChrono(){location.href=RC_SHORTCUT_URL;}
 rcBtn.addEventListener("click",e=>{e.stopPropagation();openRaceChrono();});
-
-/* ===================== 走行前チェック(スクロール式) ===================== */
-const PRE_TITLE="7/19(日) 袖ヶ浦AM スポーツ走行チェックリスト";
-const PRE_SUBTITLE="3本走行版";
-const PRE_SET=[
-  ["空気圧① 真冷間の基準(参考)","フロント 1.8 / リア 1.7"],
-  ["空気圧② アクアライン到着直後にセット","**フロント 2.0 / リア 1.9**"],
-  ["空気圧③ 走行中の温間目標","**フロント 2.4 / リア 2.0**"],
-  ["減衰(変更なし)","**フロント 最強から5戻し / リア 最強から10戻し**"]
-];
-const PRE_NOTES=[
-  "空気圧は②で1回だけセット → 触らず走り出す → 1本目中盤の温間実測で③に合わせる。②は「温まった分を見込んだ冷間相当」で、真冷間で1.8を入れるのと同じ空気量(到着から1時間以内の出走なら誤差なし)。冷えて下がっても足さないこと(足すと入れすぎになる)。",
-  "★空気入れ必須(1本目中盤の温間合わせと、帰りの指定圧充填に使う)"
-];
-const PRE_SECTIONS=[
-  {title:"前日(7/18 土)",items:[
-    {t:"天気確認・雨なら延期",link:{label:"Yahoo!天気 袖ケ浦",url:"https://weather.yahoo.co.jp/weather/jp/12/4530/12229.html"}},
-    "エアゲージ+**空気入れ**の動作確認 ★",
-    "大きいカス(拾いもの)は剥がしてOK。**センターブロック端のめくれの深さを確認**: 軽く起こして根本を見る(浅い=表層でOK / ブロックごと浮く=欠ける前提で監視)。写真を撮る",
-    "エンジンオイル・冷却水・ブレーキフルード・パッド残量・ホイールナットの締め・燃料",
-    "荷物: ヘルメット / グローブ / 長袖長ズボン / 靴 / ライセンス / 飲料 / 牽引フック / 現金"
-  ]},
-  {title:"当日・現地に着いたら",items:[
-    "行きの高速はドアラベルの指定空気圧のまま走ってくる",
-    "到着直後に **フロント2.0 / リア1.9** へセット(1回だけ)。以降コースインまで触らない(冷えて下がっても足さない)",
-    "受付・走行手続き",
-    "車内の物とフロアマットを全部降ろす",
-    "牽引フックを装着",
-    "スマホをガッチリ固定(取り付けの向きをメモ)",
-    "空気入れとエアゲージをピットに置いておく"
-  ]},
-  {title:"コースイン直前(毎回共通)",items:[
-    "空気圧: 1本目は到着時セット(**フロント2.0/リア1.9**)のまま調整しない / 2本目・3本目は温間**フロント2.4/リア2.0**を確認",
-    "フロントのブロック端めくれをチラ見(急に進んでいないか。**底にコードが見えたら走行終了**)",
-    "ヘルメット・グローブ着用",
-    "**シートベルトを締めて、たるみを取る**",
-    "窓を全部閉める、ミラー位置確認",
-    "RaceChrono 記録スタート",
-    "減衰の確認は1本目のみ: **フロント最強から5戻し / リア最強から10戻し**"
-  ]},
-  {title:"1本目 = 慣らし+空気圧合わせ",items:[
-    "最初の2周はウォームアップ(タイムは見ない・ブレーキも様子見)",
-    "ウォームアップ中に5コーナー進入の目印を決める(1035m付近の看板・縁石など)",
-    "**開始10〜15分でピットイン → 温間を実測 → フロント2.4/リア2.0に合わせる**(足す・抜くどちらもあり得る)",
-    "残りはアタック2〜3周 → クールダウン1周 の繰り返し"
-  ]},
-  {title:"2本目 = アタック本命(温間2.4のまま)",items:[
-    "開始時に温間 **フロント2.4/リア2.0** を確認",
-    "アタック2〜3周 → クールダウン1周(タイムを狙うのはこの本が本命)",
-    "グリップ低下(タレ)を感じたらすぐ温間を実測(フロント2.6を超えていたら2.4まで抜く)",
-    "前が詰まったら1周捨てて間隔を作り直す"
-  ]},
-  {title:"3本目 = 練習(温間2.4のまま)",items:[
-    "開始時に温間 **フロント2.4/リア2.0** を確認",
-    "5コーナー進入の反復練習(決めた目印で毎周同じ操作)",
-    "暑い時間帯なのでクールダウン多め(上がっていたら2.4まで抜く)"
-  ]},
-  {title:"走行後",items:[
-    "1コーナー出口の跳ねが出たか・出なかったかをメモ",
-    "温間空気圧を記録(フロント/リア)",
-    "ブロック端めくれの進行を走行前の写真と比較(フロント/リア別・写真)",
-    "**タイヤ内部のコード(繊維)が見えたら、そのタイヤでは以後走らない**",
-    "**帰る前にドアラベルの指定空気圧まで充填**(1.8のままの高速はNG)",
-    "RaceChronoのログ保存を確認(後日ログから区間タイムの合否判定をする)"
-  ]}
-];
-const PRE_RULES={title:"走り方の約束(走行中はこれだけ守る)",items:[
-  "2コーナー: 旋回中はアクセルを戻さない(踏み足すか、そのまま固定)",
-  "4ヘアピン: 出口の速度優先(進入で突っ込まない)",
-  "5コーナー進入: 目印で軽く1回ブレーキ → 離しながらハンドルを切り始める。毎周同じに",
-  "前が詰まったら1周捨てる(無理に追わない)"
-]};
-const PRE_EXPLAIN={title:"今回の温間2.4について",text:"今回は終日フロント2.4で管理する。狙いは2つ: ①センターブロック端のめくれ(圧集中+熱のサイン)を進行させない ②1コーナー出口の跳ねを出さない。タイムとの関係は走行後にログを7/13と比較して判定する。当日は「跳ねが出たかどうか」だけ覚えておけばOK。"};
-
-const PRE_KEY="predrive_checked";
-let preChecks={};
-try{const o=JSON.parse(localStorage.getItem(PRE_KEY));if(o&&typeof o==="object")preChecks=o;}catch(e){}
-function savePreChecks(){try{localStorage.setItem(PRE_KEY,JSON.stringify(preChecks));}catch(e){}}
-
-const preBody=$("preBody");
-let preRows=[]; /* {key,el,box} リセット時の一括更新用 */
-let preBuilt=false;
-
-function makeRefCard(title,items,paragraph){
-  const h=document.createElement("div");h.className="preH";h.textContent=title;preBody.appendChild(h);
-  const card=document.createElement("div");card.className="refCard";
-  if(items){items.forEach(t=>{const d=document.createElement("div");d.className="rItem";d.appendChild(withEmph(t));card.appendChild(d);});}
-  if(paragraph){const p=document.createElement("div");p.appendChild(withEmph(paragraph));card.appendChild(p);}
-  preBody.appendChild(card);
-}
-
-function renderPre(){
-  if(preBuilt){refreshPre();return;}
-  preBody.textContent="";
-
-  const t=document.createElement("div");t.className="preTitle";t.textContent=PRE_TITLE;preBody.appendChild(t);
-  const st=document.createElement("div");st.className="preSubtitle";st.textContent=PRE_SUBTITLE;preBody.appendChild(st);
-
-  /* 今回のセット(参照) */
-  const setH=document.createElement("div");setH.className="preH";setH.textContent="今回のセット";preBody.appendChild(setH);
-  const setCard=document.createElement("div");setCard.className="setCard";
-  PRE_SET.forEach(([k,v])=>{
-    const row=document.createElement("div");row.className="setRow";
-    const ke=document.createElement("span");ke.className="k";ke.textContent=k;
-    const ve=document.createElement("span");ve.className="v";ve.appendChild(withEmph(v));
-    row.append(ke,ve);setCard.appendChild(row);
-  });
-  preBody.appendChild(setCard);
-  PRE_NOTES.forEach(n=>{const d=document.createElement("div");d.className="note";d.appendChild(withEmph(n));preBody.appendChild(d);});
-
-  /* チェック項目セクション */
-  PRE_SECTIONS.forEach((sec,si)=>{
-    const h=document.createElement("div");h.className="preH";h.textContent=sec.title;preBody.appendChild(h);
-    sec.items.forEach((item,ii)=>{
-      const key="s"+si+"i"+ii;
-      const obj=(typeof item==="string")?{t:item}:item;
-      const row=document.createElement("button");row.type="button";row.className="prow";
-      const box=document.createElement("span");box.className="pbox";
-      const label=document.createElement("span");label.className="plabel";
-      label.appendChild(withEmph(obj.t));
-      if(obj.link){
-        const a=document.createElement("a");a.className="plink";a.textContent=obj.link.label;
-        a.href=obj.link.url;a.target="_blank";a.rel="noopener";
-        a.addEventListener("pointerdown",e=>e.stopPropagation());
-        a.addEventListener("click",e=>e.stopPropagation());
-        label.appendChild(document.createElement("br"));
-        label.appendChild(a);
-      }
-      row.append(box,label);
-      onPress(row,()=>togglePre(key));
-      preBody.appendChild(row);
-      preRows.push({key:key,el:row,box:box});
-    });
-  });
-
-  /* 参照ブロック */
-  makeRefCard(PRE_RULES.title,PRE_RULES.items,null);
-  makeRefCard(PRE_EXPLAIN.title,null,PRE_EXPLAIN.text);
-
-  const clear=document.createElement("button");clear.type="button";clear.className="clearBtn";
-  clear.textContent="チェックをすべてクリア";
-  onPress(clear,()=>askConfirm("走行前チェックを\nすべてクリアしますか?","はい、クリアする",clearPre));
-  preBody.appendChild(clear);
-
-  preBuilt=true;
-  refreshPre();
-}
-function refreshPre(){
-  preRows.forEach(r=>{
-    const on=!!preChecks[r.key];
-    r.el.classList.toggle("pdone",on);
-    r.box.textContent=on?"✓":"";
-  });
-}
-function togglePre(key){
-  if(preChecks[key])delete preChecks[key];else preChecks[key]=true;
-  savePreChecks();
-  if(navigator.vibrate){try{navigator.vibrate(15);}catch(e){}}
-  refreshPre();
-}
-function clearPre(){
-  preChecks={};savePreChecks();refreshPre();
-}
 
 /* ===================== メニュー配線 ===================== */
 onPress($("toPre"),()=>showScreen("pre"));

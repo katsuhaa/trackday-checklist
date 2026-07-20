@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7/25 袖ヶ浦 フロント減衰テスト</title>
+<style>
+:root{--ink:#1f2430;--sub:#5b6472;--line:#e3e7ee;--bg:#f6f8fb;--card:#fff;--blue:#2563eb;--teal:#0d9488;--red:#dc2626;--amber:#b45309;--green:#0f9d58}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans CJK JP","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding:14px 13px 60px}
+header{background:#1f2937;color:#fff;border-radius:14px;padding:16px}
+header h1{margin:0 0 6px;font-size:18px}
+header p{margin:0;font-size:13.5px;color:#d7deea}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin:12px 0}
+.card h2{margin:0 0 9px;font-size:15px}
+table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
+table.kv td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.kv td:first-child{color:var(--sub);width:22%;white-space:nowrap}
+.mini{font-size:12px;color:var(--sub);margin:8px 0 0}
+ul.ck{list-style:none;margin:0;padding:0}
+ul.ck li{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;font-size:14px;cursor:pointer}
+ul.ck li .b{flex:0 0 22px;height:22px;border:2px solid #c3ccda;border-radius:6px;color:#fff;text-align:center;line-height:19px;font-size:15px}
+ul.ck li.on .b{background:var(--green);border-color:var(--green)}
+ul.ck li.on .b::after{content:"✓"}
+ul.ck li.on span:last-child{color:#9aa4b2;text-decoration:line-through}
+.stint{border:1px solid var(--line);border-radius:13px;margin:12px 0;overflow:hidden}
+.sh{padding:11px 13px;color:#fff}
+.sh b{font-size:15px}.sh .r{font-size:12px;opacity:.95;display:block;margin-top:2px}
+.s1 .sh{background:#334155}.s2 .sh{background:var(--blue)}.s3 .sh{background:var(--teal)}
+.sb{padding:11px 13px}
+.lbl{font-size:11.5px;color:var(--sub);font-weight:700;margin:10px 0 4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:13px;border:1px solid #cfd6e0;background:#fff;color:var(--ink);padding:8px 11px;border-radius:9px;min-height:38px;flex:1 1 auto;min-width:48px;cursor:pointer}
+.seg button.on{color:#fff;border-color:transparent;font-weight:700}
+.on.g{background:var(--green)}.on.w{background:var(--amber)}.on.b{background:var(--red)}.on.n{background:var(--blue)}
+.time{display:flex;align-items:center;gap:9px}
+.time button{font:inherit;font-size:13px;background:#374151;color:#fff;border:0;border-radius:9px;padding:8px 12px;min-height:38px;cursor:pointer}
+.tv{font-weight:800}
+textarea{width:100%;min-height:44px;font:inherit;font-size:13px;padding:7px;border:1px solid #cfd6e0;border-radius:8px;margin-top:4px}
+input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;border:1px solid #cfd6e0;border-radius:8px}
+.hr{height:1px;background:var(--line);margin:11px -13px}
+.tech{font-size:12.5px;color:var(--sub)}
+.btns{display:flex;gap:9px;margin:12px 0}
+.btns button{flex:1;font:inherit;font-size:13.5px;font-weight:700;border:0;border-radius:10px;padding:12px;cursor:pointer}
+.exp{background:var(--blue);color:#fff}.pr{background:#374151;color:#fff}.cl{background:#eef1f6;color:#475569}
+#out{width:100%;min-height:130px;font-size:12px;font-family:ui-monospace,monospace;border:1px solid #cfd6e0;border-radius:8px;padding:8px;display:none}
+@media print{body{background:#fff}.btns,#out{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>7/25(土) 袖ヶ浦 — フロント減衰テスト</h1>
+  <p>1本目 <b>前1戻し／後4戻し</b>（前後とも固め）から始めて、感触でバランスを詰める。破綻(前跳ね/前抜け)が出たら前を戻す。</p>
+</header>
+
+<section class="card">
+  <h2>セット（触らない）</h2>
+  <table class="kv">
+    <tr><td>タイヤ</td><td>PS5 205/40R17</td></tr>
+    <tr><td>減衰</td><td>現中立 前5・後8戻し（全閉=0）／<b>1本目は 前1・後4戻し</b>（後4=8の半分）</td></tr>
+    <tr><td>空気圧</td><td>冷間 F2.0/R1.7 → 到着後 F2.3/R1.9 → 温間 <b>F2.4/R1.9</b> → 帰路 F2.3/R2.1</td></tr>
+  </table>
+  <p class="mini">空気圧は到着後1回だけ・冷えても足さない・触るのは減衰のみ。帰路のF2.3/R2.1はアバルト指定値（車体にラベル無し）。</p>
+</section>
+
+<section class="card">
+  <h2>必須の持ち物</h2>
+  <ul class="ck">
+    <li><span class="b"></span><span>空気圧調整工具</span></li>
+    <li><span class="b"></span><span>ヘルメット</span></li>
+    <li><span class="b"></span><span>HANS</span></li>
+    <li><span class="b"></span><span>グローブ</span></li>
+    <li><span class="b"></span><span>マスク</span></li>
+    <li><span class="b"></span><span>長袖・長いパンツ</span></li>
+    <li><span class="b"></span><span>シューズ＋ソックス</span></li>
+    <li><span class="b"></span><span>トルクレンチ＋ソケット</span></li>
+  </ul>
+</section>
+
+<div id="stints"></div>
+
+<section class="card">
+  <div class="tech"><b>走り方：</b>1C頂上=入口、軽い一瞬に舵・制動を入れすぎない／3C=下りブラインド、最低速優先／8C=まっすぐ止めてから曲げる／2C=アクセル戻さない／クールは2アタック1クール／<b>コードが見えたら終了</b>。</div>
+</section>
+
+<div class="btns">
+  <button class="exp" onclick="exportText()">記録をテキスト化</button>
+  <button class="pr" onclick="print()">印刷</button>
+  <button class="cl" onclick="if(confirm('消す?'))location.reload()">クリア</button>
+</div>
+<textarea id="out"></textarea>
+
+</div>
+<script>
+const FRONT=['全閉','1','2','3','4','5','6','8'], REAR=['4','5','6','7','8','9','10'];
+const STINTS=[
+ {c:'s1',t:'1本目 — 前1／後4戻し',r:'前後とも固めから。破綻(前跳ね/前抜け→逆アンダー)・バランス・制動を見る',f:'1',rr:'4'},
+ {c:'s2',t:'2本目 — バランス調整',r:'S1の感触で：オーバー→後ろを緩める(数字増)／アンダー→前を緩める(数字増)。破綻していたら前を緩める',f:'',rr:''},
+ {c:'s3',t:'3本目 — 詰め',r:'中立になった所で制動安定/2C頂上/タイムを確認。余れば微調整',f:'',rr:''}
+];
+const RATE=[
+ ['フロント破綻',[['無','g'],['少し','w'],['出た','b']]],
+ ['バランス',[['アンダー','w'],['中立','g'],['オーバー','b']]],
+ ['制動 1C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
+ ['制動 3C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
+ ['制動 8C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
+ ['2C頂上',[['落ち着く','g'],['そわつく','w']]]
+];
+function seg(lbl,opts,col){
+  const b=opts.map(o=>{const[t,c]=Array.isArray(o)?o:[o,'n'];return `<button data-c="${col?c:'n'}" onclick="pick(this)">${t}</button>`}).join('');
+  return `<div class="lbl">${lbl}</div><div class="seg" data-label="${lbl}">${b}</div>`;
+}
+const host=document.getElementById('stints');
+STINTS.forEach(s=>{
+  const rate=RATE.map(r=>seg(r[0],r[1],true)).join('');
+  const el=document.createElement('div'); el.className='stint '+s.c; el.dataset.t=s.t;
+  el.innerHTML=`
+    <div class="sh"><b>${s.t}</b><span class="r">${s.r}</span></div>
+    <div class="sb">
+      <div class="lbl">この本の減衰（最強から数える）</div>
+      ${seg('前 戻し',FRONT,false)}${seg('後ろ 戻し',REAR,false)}
+      <div class="hr"></div>
+      <div class="lbl">走行後</div>
+      <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
+      ${rate}
+      ${seg('温間圧F（走行直後）',['2.2','2.3','2.4','2.5','2.6'],false)}${seg('温間圧R',['1.7','1.8','1.9','2.0','2.1'],false)}
+      <div class="lbl">メモ（前の本と比べて・路面温度も）</div>
+      <textarea data-label="メモ" placeholder="例：路面42℃／2C頂上そわつき"></textarea>
+    </div>`;
+  host.appendChild(el);
+  if(s.f) presetSeg(el,'前 戻し',s.f);
+  if(s.rr) presetSeg(el,'後ろ 戻し',s.rr);
+});
+function presetSeg(el,lbl,v){const g=[...el.querySelectorAll('.seg')].find(x=>x.dataset.label===lbl);if(g)[...g.children].forEach(b=>{if(b.textContent===v)pick(b)})}
+document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li)li.classList.toggle('on')});
+function pick(btn){[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));btn.classList.add('on',btn.dataset.c||'n')}
+function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+function exportText(){
+  let s='■ 7/25 袖ヶ浦 フロント減衰テスト\n';
+  document.querySelectorAll('.stint').forEach(el=>{
+    s+='\n【'+el.dataset.t+'】\n';
+    el.querySelectorAll('[data-label]').forEach(f=>{
+      let v='—';
+      if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
+      else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
+      else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
+      s+='  '+f.dataset.label+'：'+v+'\n';
+    });
+  });
+  const o=document.getElementById('out');o.style.display='block';o.value=s;o.scrollIntoView();o.select();
+}
+</script>
+</body>
+</html>
