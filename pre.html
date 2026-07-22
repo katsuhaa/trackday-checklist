@@ -32,6 +32,9 @@ ul.ck li.on span:last-child{color:#9aa4b2;text-decoration:line-through}
 .lbl{font-size:11.5px;color:var(--sub);font-weight:700;margin:10px 0 4px}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
 .seg button{font:inherit;font-size:13px;border:1px solid #cfd6e0;background:#fff;color:var(--ink);padding:8px 11px;border-radius:9px;min-height:38px;flex:1 1 auto;min-width:48px;cursor:pointer}
+/* 減衰(前戻し/後ろ戻し)は選択肢が多く折り返すので、ボタンを固定幅にして
+   全部同じ大きさにする(伸ばして揃えると最終行だけ大きくなり崩れるため) */
+.seg[data-label*="戻し"] button{flex:0 0 auto;width:56px;min-width:0;padding:8px 0;text-align:center}
 .seg button.on{color:#fff;border-color:transparent;font-weight:700}
 .on.g{background:var(--green)}.on.w{background:var(--amber)}.on.b{background:var(--red)}.on.n{background:var(--blue)}
 .time{display:flex;align-items:center;gap:9px}
@@ -87,11 +90,10 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 </section>
 
 <div class="btns">
-  <button class="exp" onclick="exportText()">記録をテキスト化</button>
+  <button class="exp" onclick="exportText()">ファイルに保存</button>
   <button class="pr" onclick="print()">印刷</button>
   <button class="cl" onclick="if(confirm('消す?'))location.reload()">クリア</button>
 </div>
-<textarea id="out"></textarea>
 
 </div>
 <script>
@@ -107,7 +109,7 @@ const RATE=[
  ['制動 1C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
  ['制動 3C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
  ['制動 8C',[['安定','g'],['少し流れる','w'],['流れる','b']]],
- ['2C頂上',[['落ち着く','g'],['そわつく','w']]]
+ ['2C頂上',[['許容範囲','g'],['不安定','b']]]
 ];
 function seg(lbl,opts,col){
   const b=opts.map(o=>{const[t,c]=Array.isArray(o)?o:[o,'n'];return `<button data-c="${col?c:'n'}" onclick="pick(this)">${t}</button>`}).join('');
@@ -126,7 +128,9 @@ STINTS.forEach(s=>{
       <div class="lbl">走行後</div>
       <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
       ${rate}
-      ${seg('温間圧F（走行直後）',['2.2','2.3','2.4','2.5','2.6'],false)}${seg('温間圧R',['1.7','1.8','1.9','2.0','2.1'],false)}
+      <div class="lbl">温間圧（走行直後）</div>
+      ${seg('F左',['2.2','2.3','2.4','2.5','2.6'],false)}${seg('F右',['2.2','2.3','2.4','2.5','2.6'],false)}
+      ${seg('R左',['1.7','1.8','1.9','2.0','2.1'],false)}${seg('R右',['1.7','1.8','1.9','2.0','2.1'],false)}
       <div class="lbl">メモ（前の本と比べて・路面温度も）</div>
       <textarea data-label="メモ" placeholder="例：路面42℃／2C頂上そわつき"></textarea>
     </div>`;
@@ -150,7 +154,20 @@ function exportText(){
       s+='  '+f.dataset.label+'：'+v+'\n';
     });
   });
-  const o=document.getElementById('out');o.style.display='block';o.value=s;o.scrollIntoView();o.select();
+  const fname='袖ヶ浦_7-25_フロント減衰テスト_記録.txt';
+  const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
+  /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
+  try{
+    const file=new File([blob],fname,{type:'text/plain'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:fname}).catch(()=>{});
+      return;
+    }
+  }catch(e){}
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=fname;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 </script>
 </body>
