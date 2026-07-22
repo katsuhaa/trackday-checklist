@@ -97,8 +97,8 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 
 </div>
 <script>
-/* 19段調整: 全閉(最強=0戻し)＋1〜18戻し = 19ポジション */
-const NOTCH=['全閉'].concat(Array.from({length:18},(_,k)=>String(k+1)));
+/* 減衰: 1〜19 に、最も緩い側の「全開」を末尾に追加 */
+const NOTCH=Array.from({length:19},(_,k)=>String(k+1)).concat(['全開']);
 const FRONT=NOTCH, REAR=NOTCH;
 const STINTS=[
  {c:'s1',t:'1本目 — 前1／後4戻し',r:'前後とも固めから。破綻(前跳ね/前抜け→逆アンダー)・バランス・制動を見る',f:'1',rr:'4'},
