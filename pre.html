@@ -110,7 +110,7 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 <div class="btns">
   <button class="exp" onclick="exportText()">ファイルに保存</button>
   <button class="pr" onclick="print()">印刷</button>
-  <button class="cl" onclick="if(confirm('消す?'))location.reload()">クリア</button>
+  <button class="cl" onclick="if(confirm('消す?')){localStorage.removeItem('predrive_state_v1');location.reload();}">クリア</button>
 </div>
 
 </div>
@@ -118,6 +118,9 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 /* 減衰: 1〜19 に、最も緩い側の「全開」を末尾に追加 */
 const NOTCH=Array.from({length:19},(_,k)=>String(k+1)).concat(['全開']);
 const FRONT=NOTCH, REAR=NOTCH;
+/* 入力内容を保存/復元(iPhoneがアプリを再読込しても記録が消えないように) */
+const SKEY='predrive_state_v1';
+let ready=false;
 const STINTS=[
  {c:'s1',t:'1本目 — 前1／後4戻し',r:'前後とも固めから。破綻(前跳ね/前抜け→逆アンダー)・バランス・制動を見る',f:'1',rr:'4'},
  {c:'s2',t:'2本目 — バランス調整',r:'S1の感触で：オーバー→後ろを緩める(数字増)／アンダー→前を緩める(数字増)。破綻していたら前を緩める',f:'',rr:''},
@@ -164,9 +167,36 @@ STINTS.forEach(s=>{
   if(s.rr) presetSeg(el,'後ろ 戻し',s.rr);
 });
 function presetSeg(el,lbl,v){const g=[...el.querySelectorAll('.seg')].find(x=>x.dataset.label===lbl);if(g)[...g.children].forEach(b=>{if(b.textContent===v)pick(b)})}
-document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li)li.classList.toggle('on')});
-function pick(btn){[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));btn.classList.add('on',btn.dataset.c||'n')}
-function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)}
+document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li){li.classList.toggle('on');saveState();}});
+function pick(btn){[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));btn.classList.add('on',btn.dataset.c||'n');saveState();}
+function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);saveState();}
+
+/* ---- 保存/復元 ---- */
+function collectState(){
+  const st={ck:[],seg:{},time:{},memo:{}};
+  document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
+  document.querySelectorAll('.stint').forEach((el,si)=>{
+    el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[si+'|'+sg.dataset.label]=on.textContent;});
+    const tv=el.querySelector('.time .tv');if(tv&&tv.textContent&&tv.textContent!=='—')st.time[si]=tv.textContent;
+    const ta=el.querySelector('textarea');if(ta&&ta.value.trim())st.memo[si]=ta.value;
+  });
+  return st;
+}
+function saveState(){if(!ready)return;try{localStorage.setItem(SKEY,JSON.stringify(collectState()));}catch(e){}}
+function restoreState(){
+  let st;try{st=JSON.parse(localStorage.getItem(SKEY));}catch(e){}
+  if(!st)return;
+  const lis=document.querySelectorAll('ul.ck li');
+  (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
+  document.querySelectorAll('.stint').forEach((el,si)=>{
+    el.querySelectorAll('.seg').forEach(sg=>{
+      const v=st.seg&&st.seg[si+'|'+sg.dataset.label];
+      if(v!=null)[...sg.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)pick(b);});
+    });
+    if(st.time&&st.time[si]!=null){const tv=el.querySelector('.time .tv');if(tv)tv.textContent=st.time[si];}
+    if(st.memo&&st.memo[si]!=null){const ta=el.querySelector('textarea');if(ta)ta.value=st.memo[si];}
+  });
+}
 function exportText(){
   let s='■ 7/25 袖ヶ浦 フロント減衰テスト\n';
   document.querySelectorAll('.stint').forEach(el=>{
@@ -194,6 +224,11 @@ function exportText(){
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+/* 保存済みの入力を復元してから保存を有効化(復元中の上書きを防ぐ) */
+restoreState();
+document.querySelectorAll('.stint textarea').forEach(t=>t.addEventListener('input',saveState));
+ready=true;
 </script>
 </body>
 </html>
