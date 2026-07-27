@@ -388,10 +388,14 @@ function openRaceChrono(){location.href=RC_SHORTCUT_URL;}
 rcBtn.addEventListener("click",e=>{e.stopPropagation();openRaceChrono();});
 
 /* ===================== メニュー配線 ===================== */
-onPress($("toPre"),()=>showScreen("pre"));
-onPress($("toApp"),()=>showScreen("app"));
-onPress($("toMenuApp"),()=>showScreen("menu"));
-onPress($("toMenuPre"),()=>showScreen("menu"));
+/* メニュー系の遷移だけは「指を離したとき(click)」に反応させる。
+   pointerdownで切り替えると、同じタップのclickが遷移先に渡り、
+   走行前チェック(clickで動く)のチェックが誤って付いてしまうため */
+function onTap(el,fn){el.addEventListener("click",ev=>{ev.stopPropagation();fn(ev);});}
+onTap($("toPre"),()=>showScreen("pre"));
+onTap($("toApp"),()=>showScreen("app"));
+onTap($("toMenuApp"),()=>showScreen("menu"));
+onTap($("toMenuPre"),()=>showScreen("menu"));
 
 /* ===================== 共通 ===================== */
 let wakeLock=null;
