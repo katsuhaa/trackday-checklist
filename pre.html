@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>7/25 袖ヶ浦 フロント減衰テスト</title>
+<title>8/1 袖ヶ浦 フロント減衰テスト</title>
 <style>
 :root{--ink:#1f2430;--sub:#5b6472;--line:#e3e7ee;--bg:#f6f8fb;--card:#fff;--blue:#2563eb;--teal:#0d9488;--red:#dc2626;--amber:#b45309;--green:#0f9d58}
 *{box-sizing:border-box}
@@ -55,7 +55,7 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 <div class="wrap">
 
 <header>
-  <h1>7/25(土) 袖ヶ浦 — フロント減衰テスト</h1>
+  <h1>8/1(土) 袖ヶ浦 — フロント減衰テスト</h1>
   <p>1本目 <b>前1戻し／後4戻し</b>（前後とも固め）から始めて、感触でバランスを詰める。破綻(前跳ね/前抜け)が出たら前を戻す。</p>
 </header>
 
@@ -64,9 +64,9 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
   <table class="kv">
     <tr><td>タイヤ</td><td>PS5 205/40R17</td></tr>
     <tr><td>減衰</td><td>現中立 前5・後8戻し（全閉=0）／<b>1本目は 前1・後4戻し</b>（後4=8の半分）</td></tr>
-    <tr><td>空気圧</td><td>冷間 F2.0/R1.7 → 到着後 F2.3/R1.9 → 温間 <b>F2.4/R1.9</b> → 帰路 F2.3/R2.1</td></tr>
+    <tr><td>空気圧</td><td>走行前 <b>F1.9/R1.8</b> → 温間目標 <b>F2.4/R2.0</b> → 帰路 F2.3/R2.1</td></tr>
   </table>
-  <p class="mini">空気圧は到着後1回だけ・冷えても足さない・触るのは減衰のみ。帰路のF2.3/R2.1はアバルト指定値（車体にラベル無し）。</p>
+  <p class="mini">空気圧は走行前1回だけ・冷えても足さない・触るのは減衰のみ。帰路のF2.3/R2.1はアバルト指定値（車体にラベル無し）。</p>
 </section>
 
 <section class="card">
@@ -110,7 +110,7 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 <div class="btns">
   <button class="exp" onclick="exportText()">ファイルに保存</button>
   <button class="pr" onclick="print()">印刷</button>
-  <button class="cl" onclick="if(confirm('消す?')){localStorage.removeItem('predrive_state_v1');location.reload();}">クリア</button>
+  <button class="cl" onclick="clearAll()">クリア</button>
 </div>
 
 </div>
@@ -118,8 +118,9 @@ input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;b
 /* 減衰: 1〜19 に、最も緩い側の「全開」を末尾に追加 */
 const NOTCH=Array.from({length:19},(_,k)=>String(k+1)).concat(['全開']);
 const FRONT=NOTCH, REAR=NOTCH;
-/* 入力内容を保存/復元(iPhoneがアプリを再読込しても記録が消えないように) */
-const SKEY='predrive_state_v1';
+/* 入力内容を保存/復元(iPhoneがアプリを再読込しても記録が消えないように)。
+   キーはイベントごとに変える(前回の記録が新イベントに復元されないため) */
+const SKEY='predrive_state_8-1';
 let ready=false;
 const STINTS=[
  {c:'s1',t:'1本目 — 前1／後4戻し',r:'前後とも固めから。破綻(前跳ね/前抜け→逆アンダー)・バランス・制動を見る',f:'1',rr:'4'},
@@ -198,7 +199,7 @@ function restoreState(){
   });
 }
 function exportText(){
-  let s='■ 7/25 袖ヶ浦 フロント減衰テスト\n';
+  let s='■ 8/1 袖ヶ浦 フロント減衰テスト\n';
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n';
     el.querySelectorAll('[data-label]').forEach(f=>{
@@ -209,7 +210,7 @@ function exportText(){
       s+='  '+f.dataset.label+'：'+v+'\n';
     });
   });
-  const fname='袖ヶ浦_7-25_フロント減衰テスト_記録.txt';
+  const fname='袖ヶ浦_8-1_フロント減衰テスト_記録.txt';
   const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
   /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
   try{
@@ -224,6 +225,9 @@ function exportText(){
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
+
+/* クリア: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
+function clearAll(){if(confirm('消す?')){try{localStorage.removeItem(SKEY);}catch(e){}location.reload();}}
 
 /* 保存済みの入力を復元してから保存を有効化(復元中の上書きを防ぐ) */
 restoreState();
