@@ -176,7 +176,8 @@ STINTS.forEach(s=>{
 });
 function presetSeg(el,lbl,v){const g=[...el.querySelectorAll('.seg')].find(x=>x.dataset.label===lbl);if(g)[...g.children].forEach(b=>{if(b.textContent===v)pick(b)})}
 document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li){li.classList.toggle('on');saveState();}});
-function pick(btn){[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));btn.classList.add('on',btn.dataset.c||'n');saveState();}
+/* 選択中のボタンをもう一度押すと選択解除(未選択に戻す) */
+function pick(btn){const wasOn=btn.classList.contains('on');[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));if(!wasOn)btn.classList.add('on',btn.dataset.c||'n');saveState();}
 function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);saveState();}
 
 /* ---- 保存/復元 ---- */
@@ -195,6 +196,8 @@ function saveState(){if(!ready)return;try{localStorage.setItem(SKEY,JSON.stringi
 function restoreState(){
   let st;try{st=JSON.parse(localStorage.getItem(SKEY));}catch(e){}
   if(!st)return;
+  /* 保存済み状態を正とする(プリセットや前回の選択解除を反映するため一旦クリア) */
+  document.querySelectorAll('.stint .seg button.on').forEach(b=>b.classList.remove('on','g','w','b','n'));
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
   document.querySelectorAll('.stint').forEach((el,si)=>{
@@ -243,6 +246,8 @@ function clearAll(){if(confirm('消す?')){try{localStorage.removeItem(SKEY);}ca
 restoreState();
 document.querySelectorAll('.stint textarea').forEach(t=>t.addEventListener('input',saveState));
 ready=true;
+/* 初回(保存なし)はプリセットを基準として保存(これがないと、プリセット解除→再読込で解除が消える) */
+if(!localStorage.getItem(SKEY))saveState();
 </script>
 </body>
 </html>
