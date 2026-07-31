@@ -35,6 +35,11 @@ ul.ck li.on span:last-child{color:#9aa4b2;text-decoration:line-through}
 /* 減衰(前戻し/後ろ戻し)は選択肢が多く折り返すので、ボタンを固定幅にして
    全部同じ大きさにする(伸ばして揃えると最終行だけ大きくなり崩れるため) */
 .seg[data-label*="戻し"] button{flex:0 0 auto;width:56px;min-width:0;padding:8px 0;text-align:center}
+/* 温間圧はダイヤル(select)で入力。iPhoneではホイール式ピッカーが開く */
+.dials{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.dwrap{flex:1 1 46%;min-width:120px;display:flex;flex-direction:column;gap:3px}
+.dlbl{font-size:11.5px;color:var(--sub);font-weight:700}
+.dial{font:inherit;font-size:16px;font-weight:700;padding:11px 12px;border:1px solid #cfd6e0;border-radius:9px;background:#fff;min-height:46px;color:var(--ink)}
 .seg button.on{color:#fff;border-color:transparent;font-weight:700}
 .on.g{background:var(--green)}.on.w{background:var(--amber)}.on.b{background:var(--red)}.on.n{background:var(--blue)}
 .time{display:flex;align-items:center;gap:9px}
@@ -144,6 +149,9 @@ function seg(lbl,opts,col){
   const b=opts.map(o=>{const[t,c]=Array.isArray(o)?o:[o,'n'];return `<button data-c="${col?c:'n'}" onclick="pick(this)">${t}</button>`}).join('');
   return `<div class="lbl">${lbl}</div><div class="seg" data-label="${lbl}">${b}</div>`;
 }
+/* 温間圧ダイヤル: 1.50〜4.00 を 0.05刻み(浮動小数の誤差を避けるため整数で生成) */
+function pOptions(){let o='<option value="">—</option>';for(let i=150;i<=400;i+=5){const s=(i/100).toFixed(2);o+=`<option value="${s}">${s}</option>`;}return o;}
+function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="温間${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
 const host=document.getElementById('stints');
 STINTS.forEach(s=>{
   const rate=RATE.map(r=>seg(r[0],r[1],true)).join('');
@@ -157,9 +165,8 @@ STINTS.forEach(s=>{
       <div class="lbl">走行後</div>
       <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
       ${rate}
-      <div class="lbl">温間圧（走行直後）</div>
-      ${seg('F左',['2.2','2.3','2.4','2.5','2.6'],false)}${seg('F右',['2.2','2.3','2.4','2.5','2.6'],false)}
-      ${seg('R左',['1.7','1.8','1.9','2.0','2.1'],false)}${seg('R右',['1.7','1.8','1.9','2.0','2.1'],false)}
+      <div class="lbl">温間圧（走行直後）1.50〜4.00・0.05刻み</div>
+      <div class="dials">${dial('F左')}${dial('F右')}${dial('R左')}${dial('R右')}</div>
       <div class="lbl">メモ（前の本と比べて・路面温度も）</div>
       <textarea data-label="メモ" placeholder="例：路面42℃／2C頂上そわつき"></textarea>
     </div>`;
@@ -174,10 +181,11 @@ function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').te
 
 /* ---- 保存/復元 ---- */
 function collectState(){
-  const st={ck:[],seg:{},time:{},memo:{}};
+  const st={ck:[],seg:{},sel:{},time:{},memo:{}};
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
     el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[si+'|'+sg.dataset.label]=on.textContent;});
+    el.querySelectorAll('select').forEach(sel=>{if(sel.value)st.sel[si+'|'+sel.dataset.label]=sel.value;});
     const tv=el.querySelector('.time .tv');if(tv&&tv.textContent&&tv.textContent!=='—')st.time[si]=tv.textContent;
     const ta=el.querySelector('textarea');if(ta&&ta.value.trim())st.memo[si]=ta.value;
   });
@@ -194,6 +202,7 @@ function restoreState(){
       const v=st.seg&&st.seg[si+'|'+sg.dataset.label];
       if(v!=null)[...sg.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)pick(b);});
     });
+    el.querySelectorAll('select').forEach(sel=>{const v=st.sel&&st.sel[si+'|'+sel.dataset.label];if(v!=null)sel.value=v;});
     if(st.time&&st.time[si]!=null){const tv=el.querySelector('.time .tv');if(tv)tv.textContent=st.time[si];}
     if(st.memo&&st.memo[si]!=null){const ta=el.querySelector('textarea');if(ta)ta.value=st.memo[si];}
   });
@@ -206,6 +215,7 @@ function exportText(){
       let v='—';
       if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
       else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
+      else if(f.tagName==='SELECT')v=f.value||'—';
       else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
       s+='  '+f.dataset.label+'：'+v+'\n';
     });
