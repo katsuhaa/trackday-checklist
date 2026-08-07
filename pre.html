@@ -3,257 +3,315 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>袖ヶ浦 8/8 走行前ブリーフ</title>
+<title>8/8 袖ヶ浦 走行前ブリーフ</title>
 <style>
-  :root{
-    --bg:#fff; --card:#fff; --line:#d9dde2; --tx:#16191c; --dim:#5f6a75;
-    --a:#1f6fd0; --warn:#c62828; --ok:#1e7a4f; --hl:#f3f5f7;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;padding:14px 14px 40px;background:var(--bg);color:var(--tx);
-       font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
-       line-height:1.6;font-size:14.5px;-webkit-text-size-adjust:100%}
-  .wrap{max-width:760px;margin:0 auto}
-  h1{font-size:1.3rem;margin:0 0 2px}
-  .sub{color:var(--dim);font-size:.86rem;margin-bottom:14px}
-  h2{font-size:1.02rem;margin:20px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--line);
-     page-break-after:avoid}
-  h3{font-size:.98rem;margin:0 0 6px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
-        padding:11px 13px;margin:9px 0;page-break-inside:avoid}
-  .warn{border-left:4px solid var(--warn)}
-  .good{border-left:4px solid var(--ok)}
-  .key{border-left:4px solid var(--a)}
-  .note{color:var(--dim);font-size:.85rem}
-  p{margin:6px 0}
-  ul{margin:6px 0;padding-left:1.15em}
-  li{margin:4px 0}
-  .chk{display:flex;gap:9px;align-items:flex-start;padding:6px 2px;
-       border-bottom:1px dashed var(--line);cursor:pointer}
-  .chk:last-child{border-bottom:none}
-  .box{flex:0 0 19px;height:19px;margin-top:2px;border:2px solid #8a939d;border-radius:5px;
-       display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent}
-  .chk.on .box{background:var(--ok);border-color:var(--ok);color:#fff}
-  .chk.on .lbl{opacity:.5;text-decoration:line-through}
-  .lbl{flex:1}
-  table{width:100%;border-collapse:collapse;font-size:.86rem;margin:7px 0}
-  th,td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
-  th{background:var(--hl);font-weight:600}
-  .num th{white-space:nowrap}
-  .rx{background:var(--hl);border-radius:7px;padding:8px 10px;margin:7px 0}
-  .rx b{color:var(--a)}
-  .tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:.76rem;
-       font-weight:700;background:var(--a);color:#fff;vertical-align:2px}
-  .tag.mod{background:var(--ok)}
-  .tag.no{background:#7a828b}
-  .rec{font-family:ui-monospace,Menlo,monospace;font-size:.8rem;white-space:pre-wrap;
-       background:var(--hl);border-radius:7px;padding:9px;line-height:1.9}
-  .fill{border-bottom:1px solid #aab; display:inline-block; min-width:52px}
-  @media print{
-    @page{size:A4;margin:11mm}
-    body{padding:0;font-size:10.2pt;line-height:1.48}
-    .wrap{max-width:none}
-    h2{margin:12px 0 6px}
-    .card{margin:6px 0;padding:8px 10px}
-    .chk{cursor:default}
-  }
-  @media (prefers-color-scheme: dark){
-    @media screen{
-      :root{ --bg:#0f1113; --card:#191c1f; --line:#2b3036; --tx:#e8eaed; --dim:#9aa3ad;
-             --a:#5ba7f7; --warn:#ff6b6b; --ok:#4cc38a; --hl:#22262a; }
-    }
-  }
+:root{--ink:#1f2430;--sub:#5b6472;--line:#e3e7ee;--bg:#f6f8fb;--card:#fff;--blue:#2563eb;--teal:#0d9488;--red:#dc2626;--amber:#b45309;--green:#0f9d58}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans CJK JP","Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto;padding:14px 13px 60px}
+header{background:#1f2937;color:#fff;border-radius:14px;padding:16px}
+header h1{margin:0 0 6px;font-size:18px}
+header p{margin:0;font-size:13.5px;color:#d7deea}
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin:12px 0}
+.card h2{margin:0 0 9px;font-size:15px}
+/* 今日やらないこと(禁止事項)は赤帯で見分ける */
+.card.no{border-left:4px solid var(--red)}
+table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
+table.kv td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+table.kv td:first-child{color:var(--sub);width:22%;white-space:nowrap}
+.mini{font-size:12px;color:var(--sub);margin:8px 0 0}
+ul.ck{list-style:none;margin:0;padding:0}
+ul.ck li{display:flex;gap:10px;align-items:flex-start;padding:8px 4px;font-size:14px;cursor:pointer}
+ul.ck li .b{flex:0 0 22px;height:22px;border:2px solid #c3ccda;border-radius:6px;color:#fff;text-align:center;line-height:19px;font-size:15px}
+ul.ck li.on .b{background:var(--green);border-color:var(--green)}
+ul.ck li.on .b::after{content:"✓"}
+ul.ck li.on span:last-child{color:#9aa4b2;text-decoration:line-through}
+/* チェック項目の理由・補足(項目本文は必ず大きい文字のまま) */
+ul.ck .why{display:block;font-size:12px;color:var(--sub);margin-top:3px}
+ul.ck li.on .why{color:#c2c8d0}
+.stint{border:1px solid var(--line);border-radius:13px;margin:12px 0;overflow:hidden}
+.sh{padding:11px 13px;color:#fff}
+.sh b{font-size:15px}.sh .r{font-size:12px;opacity:.95;display:block;margin-top:2px}
+.s1 .sh{background:#334155}.s2 .sh{background:var(--blue)}.s3 .sh{background:var(--teal)}
+.sb{padding:11px 13px}
+.lbl{font-size:11.5px;color:var(--sub);font-weight:700;margin:10px 0 4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:inherit;font-size:13px;border:1px solid #cfd6e0;background:#fff;color:var(--ink);padding:8px 11px;border-radius:9px;min-height:38px;flex:1 1 auto;min-width:48px;cursor:pointer}
+/* 減衰(前戻し/後ろ戻し)は選択肢が多く折り返すので、ボタンを固定幅にして
+   全部同じ大きさにする(伸ばして揃えると最終行だけ大きくなり崩れるため) */
+.seg[data-label*="戻し"] button{flex:0 0 auto;width:56px;min-width:0;padding:8px 0;text-align:center}
+/* 温間圧はダイヤル(select)で入力。iPhoneではホイール式ピッカーが開く */
+.dials{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
+.dwrap{flex:1 1 46%;min-width:120px;display:flex;flex-direction:column;gap:3px}
+.dlbl{font-size:11.5px;color:var(--sub);font-weight:700}
+.dial{font:inherit;font-size:16px;font-weight:700;padding:11px 12px;border:1px solid #cfd6e0;border-radius:9px;background:#fff;min-height:46px;color:var(--ink)}
+.seg button.on{color:#fff;border-color:transparent;font-weight:700}
+.on.g{background:var(--green)}.on.w{background:var(--amber)}.on.b{background:var(--red)}.on.n{background:var(--blue)}
+.time{display:flex;align-items:center;gap:9px}
+.time button{font:inherit;font-size:13px;background:#374151;color:#fff;border:0;border-radius:9px;padding:8px 12px;min-height:38px;cursor:pointer}
+.tv{font-weight:800}
+textarea{width:100%;min-height:44px;font:inherit;font-size:13px;padding:7px;border:1px solid #cfd6e0;border-radius:8px;margin-top:4px}
+input.pin{width:100%;max-width:170px;font:inherit;font-size:13.5px;padding:8px;border:1px solid #cfd6e0;border-radius:8px}
+.hr{height:1px;background:var(--line);margin:11px -13px}
+.tech{font-size:12.5px;color:var(--sub)}
+.tech b{color:var(--ink)}
+.btns{display:flex;gap:9px;margin:12px 0}
+.btns button{flex:1;font:inherit;font-size:13.5px;font-weight:700;border:0;border-radius:10px;padding:12px;cursor:pointer}
+.exp{background:var(--blue);color:#fff}.pr{background:#374151;color:#fff}.cl{background:#eef1f6;color:#475569}
+#out{width:100%;min-height:130px;font-size:12px;font-family:ui-monospace,monospace;border:1px solid #cfd6e0;border-radius:8px;padding:8px;display:none}
+@media print{body{background:#fff}.btns,#out{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<h1>袖ヶ浦 8/8（金）— 走行前ブリーフ</h1>
-<div class="sub">Abarth 595 ／ SPIRIT タイプS 車高調（F8k・R4k）／ PS5 205/40R17（4本ともショルダー削れ）／ 比較の基準＝8/1 2本目</div>
+<header>
+  <h1>8/8(金) 袖ヶ浦 — 走行前ブリーフ</h1>
+  <p>主目的は<b>滑らせながら向きを変える操作に慣れる</b>こと。ブレーキを残したままノーズを向けて、<b>回りながら速度を落とす</b>。狙いは滑りの量ではなく<b>毎周同じにすること</b>。</p>
+</header>
 
-<h2>① 今日の目的と成功条件</h2>
+<section class="card">
+  <h2>セット（触らない）</h2>
+  <table class="kv">
+    <tr><td>タイヤ</td><td>PS5 205/40R17（4本ともショルダー削れ）</td></tr>
+    <tr><td>減衰</td><td><b>前1戻し・後8戻し</b>（8/1 2本目と同一・全閉=0から数える）／一日中変えない</td></tr>
+    <tr><td>空気圧</td><td>到着後に1回セット → 以降さわらない／判断は必ず<b>温間 F2.6・R2.0</b></td></tr>
+  </table>
+  <p class="mini">減衰・空気圧を動かすと 8/1 との比較が成立しません。8/23 にタイヤ(RE-71RZ)・バネ(F12/R7)・ピロアッパーが入り現行設定のデータは断絶するので、8/8 は 8/1 と直接比べられる数少ない1日です。低グリップは前提であって不調ではないため、タイムは今日の評価軸にしません。</p>
+</section>
 
-<div class="card key">
-<h3>主目的：滑らせながら向きを変える操作に慣れる</h3>
-<p>ブレーキを残したままノーズを向けて、<b>回りながら速度を落とす</b>。この操作を体に入れるのが今日の中心です。
-タイヤが滑りやすい今は、ミスが安くつく＝この練習にいちばん向いた状態で、<b>できるのは8/22まで</b>（8/23でグリップが戻ります）。</p>
-<p><b>これはもうできています。</b>最終コーナーの「待ち時間」は 0.003秒、荷重の谷の深さは 0.016 で、
-どちらもコース10か所で最小。＝制動から旋回へ、切れ目なく荷重を渡せている。体感は数字と一致しています。</p>
-<p class="note">滑りの量（|β̇|rms・8/1 2本目のアタック周中央値）で見ても、4HP 65.8 ／ 最終 40.3 mrad/s に対し、
-5=23.8・6=26.4・7=27.8・8C=29.6。<b>すでに滑らせて曲げているのは 4HP と最終</b>で、体感どおりです。
-※この数字は同じ本の中の比較にだけ使う（横Gのゼロ点補正が本ごとに違うため）。</p>
+<section class="card">
+  <h2>成功条件（この4つが揃えば今日は成功）</h2>
+  <div class="tech">
+    <b>① 滑りの再現性：</b>4HP と最終で、滑りの量が毎周同じに近づく（8/1 は周ごとの幅が 4HP 40.7・最終 35.0 mrad/s と全コーナーで最大）。<br>
+    <b>② 3C：</b>ボトム速度のばらつきが縮む（8/1 は ±6.9km/h で全コーナー最大）。<br>
+    <b>③ 9HP：</b>ボトム速度 55km/h 台。制動開始点は 8/1 のまま。<br>
+    <b>④ 条件が最後まで揃っている：</b>減衰・空気圧・スマホの固定・タイヤの面を一日中変えていない。これが崩れると上の3つは測れません。優先度はこれが一番上です。
+  </div>
+</section>
+
+<section class="card">
+  <h2>必須の持ち物</h2>
+  <ul class="ck">
+    <li><span class="b"></span><span>空気圧調整工具</span></li>
+    <li><span class="b"></span><span>ヘルメット</span></li>
+    <li><span class="b"></span><span>HANS</span></li>
+    <li><span class="b"></span><span>グローブ</span></li>
+    <li><span class="b"></span><span>マスク</span></li>
+    <li><span class="b"></span><span>長袖・長いパンツ</span></li>
+    <li><span class="b"></span><span>シューズ＋ソックス</span></li>
+    <li><span class="b"></span><span>トルクレンチ＋ソケット</span></li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>走行前の車両セッティング</h2>
+  <ul class="ck">
+    <li><span class="b"></span><span>牽引フックの装着</span></li>
+    <li><span class="b"></span><span>3点式シートベルトの退避と4点式ベルトの準備</span></li>
+    <li><span class="b"></span><span>スマホブラケットの固定</span></li>
+  </ul>
+</section>
+
+<section class="card">
+  <h2>走行前チェックリスト</h2>
+  <ul class="ck">
+    <li><span class="b"></span><span>減衰を <b>前1戻し・後8戻し</b> にセットする（8/1 2本目と同一。全閉=0から数える）
+      <span class="why">ここを変えると 8/1 との比較が成立しません。</span></span></li>
+    <li><span class="b"></span><span>空気圧を到着後に1回セットする → 以降さわらない。判断は必ず<b>温間 F2.6 / R2.0</b></span></li>
+    <li><span class="b"></span><span><b>スマホの固定を絶対に変えない。</b>走行前に取り付けの写真を1枚撮る
+      <span class="why">8/1 は2本の間に向きが約18°変わり（φ 66.5°→85.0°）、振動の指標が比較不能になりました。</span></span></li>
+    <li><span class="b"></span><span><b>タイヤは一日中同じ面のまま</b>にする（前後ローテ・左右入れ替えをしない）</span></li>
+    <li><span class="b"></span><span><b>パッド残量を目視する</b>（前後・左右）。7/25 時点で 前3mm・後2mm、消費は約1.5mm/日
+      <span class="why">前が1mm台に見えたら、その時点で今日は終了。</span></span></li>
+    <li><span class="b"></span><span>RaceChrono が 100Hz（加速度・ジャイロON）で記録しているか確認する</span></li>
+    <li><span class="b"></span><span>気温・路温をメモする。タイヤのショルダーを写真で1枚撮る（朝）</span></li>
+  </ul>
+</section>
+
+<div id="stints"></div>
+
+<section class="card">
+  <h2>コーナー別の狙い</h2>
+  <div class="tech">
+    <b>最終・4HP＝手本。</b>すでにできている2か所（最終＝待ち0.003秒・谷0.016、4HP＝待ち0.042秒・谷0.119、ともにコース最小級）。直すのではなく<b>毎周同じだけ滑らせる</b>。半径は触らない（広く回るほど速い側：4HP −0.031／最終 −0.027 秒/m）。<br>
+    <b>8C＝入口で早めにノーズを向け、車を早くまっすぐにしてから開ける。</b>制動は 7/19 と同一で直すところなし。出口 1620–1670m の加速G が 0.061（7/19 は 0.122）と足りていない。早く向きが変われば、その分早く踏める。<br>
+    <b>3C＝まっすぐ止めきってから曲げる。</b>今の進入速度のまま向きを足すと悪化する（合成G 0.874 で余力なし）。試すなら<b>進入速度を落として、余った分を向きに使う</b>。見る指標はボトム速度のばらつき。<br>
+    <b>9HP＝ボトム速度を 55km/h 台に乗せる。</b>制動開始を遅らせるのは禁止（8/1 の 14m 遅らせがオーバースピードの正体）。1741m 付近で減速が 0.3G 落ちるのは路面なので、そこで修正しようとしない。<br>
+    <b>1C＝Rmin を毎周 68m 台に。</b>強く踏まない・向きも作らない（どちらも半径を殺す）。<br>
+    <b>2C・5・6・7＝触らない。</b>すでに安定しているので今日は現状維持。<br>
+    <b>運用＝2周アタック → 1周クールダウン。</b>熱だれは最初から出ている前提で組む。アタック周でない周も練習に使い、1本に1〜2周<b>「向きを変えるだけの周」</b>を意識的に作る。
+  </div>
+</section>
+
+<section class="card no">
+  <h2>今日やらないこと</h2>
+  <div class="tech">
+    ・<b>3C で、今の進入速度のまま向きを足さない。</b>試すなら進入を落としてから。<br>
+    ・<b>1C・4HP・最終でブレーキを強くしない・突っ込みを増やさない。</b>半径が死んで遅くなる。<br>
+    ・<b>「もっと滑らせる」を目標にしない。</b>今日の狙いは量ではなく再現性。<br>
+    ・<b>制動開始を遅らせない</b>（特に 9HP）。<br>
+    ・<b>9HP・3C・8C でラインを広げない。</b>この3か所は広く回るほど遅い。<br>
+    ・<b>走行中に減衰・空気圧を変えない。</b>変えたらその本は比較から外す。<br>
+    ・<b>タイヤのローテ・左右入れ替えをしない。</b><br>
+    ・<b>タイムを目標にしない。</b>
+  </div>
+</section>
+
+<section class="card">
+  <h2>走行後</h2>
+  <ul class="ck">
+    <li><span class="b"></span><span>空気圧を標準設定に戻す</span></li>
+    <li><span class="b"></span><span>減衰をすべて解放</span></li>
+    <li><span class="b"></span><span>3点式シートベルトを準備と4点式の片付け</span></li>
+    <li><span class="b"></span><span>パッド厚を測る（前・後／左右）</span></li>
+    <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（夕方）</span></li>
+    <li><span class="b"></span><span>.rcz を 01_ログ/2026-08-08/ に入れる</span></li>
+    <li><span class="b"></span><span>メモをテキスト1本に統合する</span></li>
+  </ul>
+</section>
+
+<div class="btns">
+  <button class="exp" onclick="exportText()">ファイルに保存</button>
+  <button class="pr" onclick="print()">印刷</button>
+  <button class="cl" onclick="clearAll()">クリア</button>
 </div>
-
-<div class="card">
-<h3>副目的：コーナー入口の踏み方の解像度（3か所限定）</h3>
-<p>「強く踏んで制動時間を短くする」は正しい方向ですが、効く場所は <b>3C・9HP・8C の3か所だけ</b>です。
-1C・4HP・最終は広く回るほど速いコーナー（−0.017／−0.031／−0.027 秒/m）なので、強く踏むと半径を殺します。</p>
-<p class="note">待ち時間も 1C 0.389秒／4HP 0.042／最終 0.003 で詰め代がありません。残っているのは 3C 0.715 と 9HP 0.411 だけです。</p>
-</div>
-
-<div class="card">
-<h3>今日の位置づけ</h3>
-<p>8/23 にタイヤ（RE-71RZ）・バネ（F12/R7）・ピロアッパーが入り、<b>現行設定のデータはそこで断絶</b>します。
-8/8 は現行設定で 8/1 と直接比べられる、数少ない1日です。設定を動かさないことに価値があります。</p>
-<p class="note">低グリップは前提であって不調ではありません。タイムとグリップ包絡は今日の評価軸にしません。</p>
-</div>
-
-<div class="card good">
-<h3>成功条件（この4つが揃えば今日は成功）</h3>
-<ul>
-  <li><b>滑りの再現性：</b>4HP と最終で、滑りの量が毎周同じに近づく。<span class="note">8/1 は周ごとの幅が 4HP 40.7・最終 35.0 mrad/s と全コーナーで最大。量を増やすのではなく、同じ量を出せるようにする。</span></li>
-  <li><b>3C：</b>ボトム速度のばらつきが縮む（8/1 は ±6.9km/h で全コーナー最大）。</li>
-  <li><b>9HP：</b>ボトム速度 <b>55km/h 台</b>。制動開始点は 8/1 のまま。</li>
-  <li><b>条件が最後まで揃っている：</b>減衰・空気圧・スマホの固定・タイヤの面を一日中変えていない。<br>
-      <span class="note">これが崩れると、上の3つは測れなくなります。優先度はこれが一番上です。</span></li>
-</ul>
-</div>
-
-<h2>② 走行前チェックリスト</h2>
-<div class="card">
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    減衰を <b>前1戻し・後8戻し</b> にセット（8/1 2本目と同一。全閉=0から数える）
-    <span class="note">ここを変えると 8/1 との比較が成立しません。</span></div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    空気圧は到着後に1回セット → 以降さわらない。判断は必ず<b>温間 F2.6 / R2.0</b></div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    <b>スマホの固定を絶対に変えない。</b>走行前に取り付けの写真を1枚
-    <span class="note">8/1 は2本の間に向きが約18°変わり（φ 66.5°→85.0°）、振動の指標が比較不能になりました。</span></div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    <b>タイヤは一日中同じ面のまま</b>（前後ローテ・左右入れ替えをしない）</div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    <b>パッド残量を目視</b>（前後・左右）。7/25 時点で 前3mm・後2mm、消費は約1.5mm/日
-    <span class="note">前が1mm台に見えたら、その時点で今日は終了。</span></div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    RaceChrono が 100Hz（加速度・ジャイロON）で記録しているか確認</div></div>
-  <div class="chk" onclick="this.classList.toggle('on')"><div class="box">✓</div><div class="lbl">
-    気温・路温をメモ。タイヤのショルダーを写真で1枚（朝）</div></div>
-</div>
-
-<h2>③ コーナー別の狙い</h2>
-
-<div class="card good">
-<h3>最終・4HP <span class="tag mod">手本 ／ 今日はここで「同じ滑り」を作る</span></h3>
-<p>すでにできている2か所です。<b>直すのではなく、毎周同じにするのが課題。</b>
-最終＝待ち0.003秒・谷の深さ0.016（ともにコース最小）、4HP＝待ち0.042秒・谷の深さ0.119。</p>
-<div class="rx"><b>やること：この2か所の感触を基準に置く。</b>
-滑りの量の周ごとの幅が 4HP 40.7・最終 35.0 mrad/s と全コーナーで最大です。
-狙いは「もっと滑らせる」ではなく <b>「毎周同じだけ滑らせる」</b>。同じ舵角・同じ残し方を再現する。</p>
-<p class="note">半径は触らない：どちらも広く回るほど速い側（4HP −0.031／最終 −0.027 秒/m）。向きを作るために小さく回らないこと。</p>
-</div>
-
-<div class="card">
-<h3>8C <span class="tag">この操作を足す余地がある ／ 出口が本題</span></h3>
-<p>制動そのものは 7/19 と同一（減速G 0.611 vs 0.609）＝<b>入口は直すところがない。</b>
-一方で滑りの量は 29.6 mrad/s と少なく、待ちは 0.414秒 残っている＝<b>まだ「止めてから曲げて」いる</b>。</p>
-<div class="rx"><b>処方：入口で早めにノーズを向け、車を早くまっすぐにしてから開ける。</b>
-出口 1620–1670m の平均加速Gが 7/19 の 0.122 に対し 8/1 は 0.061 と全周で下回っています。
-横G 0.82–0.83 のまま合成 0.83 で頭打ち＝縦の余力がない。早く向きが変われば、その分早く踏めます。</p>
-<p class="note">ここが詰まると 9HP へ遅く入るので、9HP の課題ともつながっています。半径は +0.005秒/m ＝広げても効きません。</p>
-</div>
-
-<div class="card warn">
-<h3>3C <span class="tag">ここだけは逆 ／ 狙い 0.2〜0.3秒</span></h3>
-<p><b>3C では、今の進入速度のままノーズを向けると悪化します。</b>
-進入 136–143km/h と速いのに最大減速Gは 0.626–0.796 どまり、合成Gだけ 0.874。
-＝<b>すでに旋回を残したまま踏んでいて、縦に使えていない。</b>タイヤの余力が残っていません。</p>
-<div class="rx"><b>処方：同じ突っ込みなら、まっすぐ止めきってから曲げる。</b>
-この操作を3Cで練習したいなら、<b>進入速度を落として、余った分を向きに使う</b>。速度はそのままで向きだけ足さない。</div>
-<p><b>見る指標＝ボトム速度のばらつき。</b>8/1 は ±6.9km/h で全コーナー最大。
-ベストラップの周7ですら 77.1km/h（中央値 84.1）＝<b>ベストラップでも3Cは失敗しています。</b></p>
-<p class="note">ラインは触らない：半径を広げても +0.004秒/m でほぼ効きません。</p>
-</div>
-
-<div class="card">
-<h3>9HP <span class="tag">ボトム速度だけ ／ 狙い 0.3〜0.4秒</span></h3>
-<p>制動開始点は 7/19 とほぼ同じ（1719.9m vs 1721.7m）なのに、最大減速G 0.650（7/19 は 0.732）、
-横G 0.913（0.955）。＝弱く踏んで一気に離している。区間タイムのばらつきも全コーナー最大（SD 0.167秒）。</p>
-<div class="rx"><b>処方：ボトム速度を 55km/h 台に乗せる。制動開始を遅らせるのは禁止。</b>
-8/1 の1本目→2本目で 14m 遅らせたのが、オーバースピードの正体でした。</div>
-<p class="note"><b>※1741m 付近で車が軽くなって減速が 0.3G 落ちるのは路面です。</b>ブレーキを踏んで約23m後・制動区間の30〜55%地点に来るので避けようがありません。
-自分のミスではないので、そこで修正しようとしないこと。（7/16・7/19・7/25・8/1 の4日すべてに同じ場所で出ています）</p>
-<p class="note">ラインは絶対に広げない：9HPだけは広く回るほど遅い（+0.047秒/m）。</p>
-</div>
-
-<div class="card">
-<h3>1C <span class="tag no">半径だけ ／ 狙い 0.05〜0.07秒</span></h3>
-<p>使用率101%・待ち0.389秒で、荷重の渡し方としてはほぼ完成しています。
-<b>ここで強く踏まない。向きも作らない。</b>どちらも半径を殺します。</p>
-<div class="rx"><b>処方：Rmin を毎周 68m 台に。</b>8/1 は 55.9〜68.4m と 12.6m 振れています
-（1m 広げると −0.017秒、r=−0.68 で全コーナー中いちばん明確）。</div>
-</div>
-
-<h2>④ 触らないコーナー</h2>
-<div class="card">
-<table class="num">
-  <tr><th>2C</th><td>ラインのばらつきが正味 0.00m ＝完全に安定。制動もゼロ。<b>直すところがない。</b></td></tr>
-  <tr><th>5・6・7</th><td>滑りの量が 23.8／26.4／27.8 mrad/s と少なく、周ごとの再現性も良い。今日は現状維持。</td></tr>
-</table>
-</div>
-
-<h2>⑤ セッション運用</h2>
-<div class="card">
-<p><b>2周アタック → 1周クールダウン。</b>8/1 は熱だれが最初から出ていました（包絡が最初から0.93前後で横ばい、最後に0.898へ低下）。
-7/19 のように「周を重ねてタイヤが入ってくる」形にはなりません。<b>入っている状態は最初からで、あとは落ちるだけ</b>という前提で組みます。</p>
-<p><b>アタック周でない周も練習に使う。</b>滑りの量も待ち時間も谷の深さも、全開でなくても測れます。
-実際 8/1 で学習曲線が出たのは遅いほうの本でした（1本目の谷の深さ 0.332→0.343→0.166→0.199→0.162）。</p>
-<p><b>1本に1〜2周、「向きを変えるだけの周」を意識的に作る。</b>タイムを狙わず、最終と4HPの感触をそのまま 8C に持ち込む。
-3C はその周では進入を落として試す。</p>
-</div>
-
-<h2>⑥ 記録シート</h2>
-<div class="card">
-<table>
-  <tr><th style="width:30%">項目</th><th>1本目</th><th>2本目</th><th>3本目</th></tr>
-  <tr><th>走行時刻</th><td></td><td></td><td></td></tr>
-  <tr><th>減衰（前／後 戻し）</th><td></td><td></td><td></td></tr>
-  <tr><th>温間空気圧 F／R（走行前）</th><td></td><td></td><td></td></tr>
-  <tr><th>温間空気圧 F／R（走行後）</th><td></td><td></td><td></td></tr>
-  <tr><th>気温／路温</th><td></td><td></td><td></td></tr>
-  <tr><th>スマホの固定を触ったか</th><td>触っていない／触った</td><td>触っていない／触った</td><td>触っていない／触った</td></tr>
-  <tr><th>滑りの出方（最終）</th><td>毎周同じ／ばらつく</td><td>毎周同じ／ばらつく</td><td>毎周同じ／ばらつく</td></tr>
-  <tr><th>滑りの出方（4HP）</th><td>毎周同じ／ばらつく</td><td>毎周同じ／ばらつく</td><td>毎周同じ／ばらつく</td></tr>
-  <tr><th>8C 入口で向きを作れたか</th><td></td><td></td><td></td></tr>
-  <tr><th>3C 入口の感触</th><td></td><td></td><td></td></tr>
-  <tr><th>9HP 入口の感触</th><td></td><td></td><td></td></tr>
-  <tr><th>その他メモ</th><td></td><td></td><td></td></tr>
-</table>
-<p class="rec">走行後：パッド厚（前 <span class="fill"></span>／<span class="fill"></span>　後 <span class="fill"></span>／<span class="fill"></span> mm）　タイヤのショルダー写真（夕方）
-.rcz を 01_ログ/2026-08-08/ に入れる　　メモをテキスト1本に統合</p>
-</div>
-
-<h2>⑦ 今日やらないこと</h2>
-<div class="card warn">
-<ul>
-  <li><b>3C で、今の進入速度のまま向きを足さない。</b>すでに余力がありません。試すなら進入を落としてから。</li>
-  <li><b>1C・4HP・最終でブレーキを強くしない・突っ込みを増やさない。</b>半径が死んで遅くなります。</li>
-  <li><b>「もっと滑らせる」を目標にしない。</b>今日の狙いは量ではなく再現性です。</li>
-  <li><b>制動開始を遅らせない</b>（特に 9HP。8/1 の 14m 遅らせが失敗の正体）。</li>
-  <li><b>9HP・3C・8C でラインを広げない。</b>この3か所は広く回るほど遅い側です。</li>
-  <li><b>走行中に減衰・空気圧を変えない。</b>気になっても最後まで我慢する。変えたらその本は比較から外す。</li>
-  <li><b>タイヤのローテ・左右入れ替えをしない。</b></li>
-  <li><b>タイムを目標にしない。</b></li>
-</ul>
-</div>
-
-<p class="note" style="margin-top:18px">気をつけて行ってらっしゃい。帰ってきたら .rcz を入れてもらえれば、滑りの量の再現性（4HP・最終）、3Cのボトムのばらつき、9HPのボトム速度、8C出口の加速Gで判定します。</p>
 
 </div>
 <script>
-/* チェック状態を保存/復元(iPhoneがアプリを再読込しても✓が消えないように)。
+/* 減衰: 1〜19 に、最も緩い側の「全開」を末尾に追加 */
+const NOTCH=Array.from({length:19},(_,k)=>String(k+1)).concat(['全開']);
+const FRONT=NOTCH, REAR=NOTCH;
+/* 入力内容を保存/復元(iPhoneがアプリを再読込しても記録が消えないように)。
    キーはイベントごとに変える(前回の記録が新イベントに復元されないため) */
 const SKEY='predrive_state_8-8';
-const CHK=[...document.querySelectorAll('.chk')];
-try{
-  (JSON.parse(localStorage.getItem(SKEY))||[]).forEach(i=>{if(CHK[i])CHK[i].classList.add('on');});
-}catch(e){}
-/* 表示の切り替えはインライン onclick が先に済ませているので、ここでは保存だけ */
-CHK.forEach(el=>el.addEventListener('click',()=>{
+let ready=false;
+/* 8/8 は減衰を動かさない日なので、3本とも 前1・後8戻し をプリセットする */
+const STINTS=[
+ {c:'s1',t:'1本目 — 最終と4HPを基準に置く',r:'すでにできている2か所の感触を確かめる。もっと滑らせるのではなく、毎周同じだけ滑らせる',f:'1',rr:'8'},
+ {c:'s2',t:'2本目 — 8Cに持ち込む',r:'入口で早めにノーズを向け、まっすぐにしてから開ける。3Cは進入を落として試す周を作る',f:'1',rr:'8'},
+ {c:'s3',t:'3本目 — 再現性の確認',r:'9HPのボトムを55km/h台に乗せる(制動開始は8/1のまま)。4HP・最終の滑りが毎周そろっているか',f:'1',rr:'8'}
+];
+const RATE=[
+ ['スマホの固定を触ったか',[['触っていない','g'],['触った','b']]],
+ ['滑りの出方 最終',[['毎周同じ','g'],['ややばらつく','w'],['ばらつく','b']]],
+ ['滑りの出方 4HP',[['毎周同じ','g'],['ややばらつく','w'],['ばらつく','b']]],
+ ['8C 入口で向きを作れたか',[['作れた','g'],['少し作れた','w'],['止めてから曲げた','b']]],
+ ['3C 入口の感触',[['まっすぐ止めきれた','g'],['進入を落として試した','w'],['速度を残したまま踏んだ','b']]],
+ ['3C ボトムのばらつき',[['そろった','g'],['ばらつく','b']]],
+ ['9HP 入口の感触',[['ボトム55km/h台に乗った','g'],['落としすぎた','w'],['オーバースピード','b']]],
+ ['1C 半径',[['広く回れた','g'],['小さく回った','b']]]
+];
+function seg(lbl,opts,col){
+  const b=opts.map(o=>{const[t,c]=Array.isArray(o)?o:[o,'n'];return `<button data-c="${col?c:'n'}" onclick="pick(this)">${t}</button>`}).join('');
+  return `<div class="lbl">${lbl}</div><div class="seg" data-label="${lbl}">${b}</div>`;
+}
+/* 温間圧ダイヤル: 1.50〜4.00 を 0.05刻み(浮動小数の誤差を避けるため整数で生成) */
+function pOptions(){let o='<option value="">—</option>';for(let i=150;i<=400;i+=5){const s=(i/100).toFixed(2);o+=`<option value="${s}">${s}</option>`;}return o;}
+function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="温間${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
+const host=document.getElementById('stints');
+STINTS.forEach(s=>{
+  const rate=RATE.map(r=>seg(r[0],r[1],true)).join('');
+  const el=document.createElement('div'); el.className='stint '+s.c; el.dataset.t=s.t;
+  el.innerHTML=`
+    <div class="sh"><b>${s.t}</b><span class="r">${s.r}</span></div>
+    <div class="sb">
+      <div class="lbl">この本の減衰（最強から数える）／8/8は前1・後8のまま動かさない</div>
+      ${seg('前 戻し',FRONT,false)}${seg('後ろ 戻し',REAR,false)}
+      <div class="lbl">温間圧（走行前）目標 F2.6／R2.0</div>
+      <div class="dials">${dial('前F')}${dial('前R')}</div>
+      <div class="lbl">気温／路温</div>
+      <input class="pin" data-label="気温／路温" placeholder="例：32℃／45℃">
+      <div class="hr"></div>
+      <div class="lbl">走行後</div>
+      <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
+      ${rate}
+      <div class="lbl">温間圧（走行直後）1.50〜4.00・0.05刻み</div>
+      <div class="dials">${dial('F左')}${dial('F右')}${dial('R左')}${dial('R右')}</div>
+      <div class="lbl">メモ（前の本と比べて・向きを変えるだけの周の感触）</div>
+      <textarea data-label="メモ" placeholder="例：最終は毎周同じ／8C出口まだ踏めない"></textarea>
+    </div>`;
+  host.appendChild(el);
+  if(s.f) presetSeg(el,'前 戻し',s.f);
+  if(s.rr) presetSeg(el,'後ろ 戻し',s.rr);
+});
+function presetSeg(el,lbl,v){const g=[...el.querySelectorAll('.seg')].find(x=>x.dataset.label===lbl);if(g)[...g.children].forEach(b=>{if(b.textContent===v)pick(b)})}
+document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li){li.classList.toggle('on');saveState();}});
+/* 選択中のボタンをもう一度押すと選択解除(未選択に戻す) */
+function pick(btn){const wasOn=btn.classList.contains('on');[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));if(!wasOn)btn.classList.add('on',btn.dataset.c||'n');saveState();}
+function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);saveState();}
+
+/* ---- 保存/復元 ---- */
+/* ダイヤル(select)と気温/路温(input)はまとめて st.sel に入れる */
+function fields(el){return el.querySelectorAll('select,input.pin');}
+function collectState(){
+  const st={ck:[],seg:{},sel:{},time:{},memo:{}};
+  document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
+  document.querySelectorAll('.stint').forEach((el,si)=>{
+    el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[si+'|'+sg.dataset.label]=on.textContent;});
+    fields(el).forEach(f=>{if(f.value)st.sel[si+'|'+f.dataset.label]=f.value;});
+    const tv=el.querySelector('.time .tv');if(tv&&tv.textContent&&tv.textContent!=='—')st.time[si]=tv.textContent;
+    const ta=el.querySelector('textarea');if(ta&&ta.value.trim())st.memo[si]=ta.value;
+  });
+  return st;
+}
+function saveState(){if(!ready)return;try{localStorage.setItem(SKEY,JSON.stringify(collectState()));}catch(e){}}
+function restoreState(){
+  let st;try{st=JSON.parse(localStorage.getItem(SKEY));}catch(e){}
+  /* 形式が違う古い保存(配列など)は無視する。中途半端に復元するとプリセットだけ消える */
+  if(!st||typeof st!=='object'||Array.isArray(st))return;
+  /* 保存済み状態を正とする(プリセットや前回の選択解除を反映するため一旦クリア) */
+  document.querySelectorAll('.stint .seg button.on').forEach(b=>b.classList.remove('on','g','w','b','n'));
+  const lis=document.querySelectorAll('ul.ck li');
+  (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
+  document.querySelectorAll('.stint').forEach((el,si)=>{
+    el.querySelectorAll('.seg').forEach(sg=>{
+      const v=st.seg&&st.seg[si+'|'+sg.dataset.label];
+      if(v!=null)[...sg.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)pick(b);});
+    });
+    fields(el).forEach(f=>{const v=st.sel&&st.sel[si+'|'+f.dataset.label];if(v!=null)f.value=v;});
+    if(st.time&&st.time[si]!=null){const tv=el.querySelector('.time .tv');if(tv)tv.textContent=st.time[si];}
+    if(st.memo&&st.memo[si]!=null){const ta=el.querySelector('textarea');if(ta)ta.value=st.memo[si];}
+  });
+}
+function exportText(){
+  let s='■ 8/8 袖ヶ浦 走行前ブリーフ\n';
+  document.querySelectorAll('.stint').forEach(el=>{
+    s+='\n【'+el.dataset.t+'】\n';
+    el.querySelectorAll('[data-label]').forEach(f=>{
+      let v='—';
+      if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
+      else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
+      else if(f.tagName==='SELECT')v=f.value||'—';
+      else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
+      s+='  '+f.dataset.label+'：'+v+'\n';
+    });
+  });
+  const fname='袖ヶ浦_8-8_走行前ブリーフ_記録.txt';
+  const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
+  /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
   try{
-    const on=[];CHK.forEach((c,i)=>{if(c.classList.contains('on'))on.push(i);});
-    localStorage.setItem(SKEY,JSON.stringify(on));
+    const file=new File([blob],fname,{type:'text/plain'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:fname}).catch(()=>{});
+      return;
+    }
   }catch(e){}
-}));
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=fname;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/* クリア: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
+function clearAll(){if(confirm('消す?')){try{localStorage.removeItem(SKEY);}catch(e){}location.reload();}}
+
+/* 保存済みの入力を復元してから保存を有効化(復元中の上書きを防ぐ) */
+restoreState();
+document.querySelectorAll('.stint textarea, .stint input.pin').forEach(t=>t.addEventListener('input',saveState));
+ready=true;
+/* 初回(保存なし)はプリセットを基準として保存(これがないと、プリセット解除→再読込で解除が消える) */
+if(!localStorage.getItem(SKEY))saveState();
 </script>
 </body>
 </html>
