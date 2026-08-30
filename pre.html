@@ -61,6 +61,19 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 /* 走行を1本増やす。巨大ボタン(グローブ前提でも押せる大きさ) */
 #addStint{width:100%;font:inherit;font-size:19px;font-weight:700;color:var(--blue);background:#fff;
   border:2px dashed #b9c4d4;border-radius:13px;padding:18px 10px;min-height:64px;cursor:pointer;margin:4px 0 0}
+/* 現在地から取得。巨大ボタン(屋外で片手で押す前提) */
+.getbtn{width:100%;font:inherit;font-size:18px;font-weight:700;color:#fff;background:var(--blue);
+  border:0;border-radius:12px;padding:17px 12px;min-height:62px;cursor:pointer;margin:12px 0 0}
+.stat{font-size:15px;color:var(--sub);margin:8px 0 0;white-space:pre-line;line-height:1.5}
+/* 写真: 撮る/選ぶボタンとサムネイル */
+.photo{margin:6px 0 16px}
+.pbtn{display:block;width:100%;font-size:18px;font-weight:700;color:var(--blue);background:#fff;
+  border:2px dashed #b9c4d4;border-radius:12px;padding:16px 10px;min-height:60px;text-align:center;cursor:pointer}
+.pv{display:none;margin-top:8px}
+.pv.on{display:block}
+.pv img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.pdel{width:100%;font:inherit;font-size:16px;font-weight:700;color:#b91c1c;background:#fff;
+  border:2px solid #f0c4c4;border-radius:10px;padding:12px;min-height:52px;margin-top:6px;cursor:pointer}
 .btns{display:flex;gap:9px;margin:14px 0}
 .btns button{flex:1;font:inherit;font-size:17px;font-weight:700;border:0;border-radius:10px;padding:15px 10px;cursor:pointer}
 .exp{background:var(--blue);color:#fff}.pr{background:#374151;color:#fff}.cl{background:#eef1f6;color:#475569}
@@ -71,7 +84,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 #ovl button{flex:1;font:inherit;font-size:24px;font-weight:800;border-radius:22px;cursor:pointer}
 #ovlYes{background:var(--red);color:#fff;border:0}
 #ovlNo{background:#fff;color:var(--ink);border:3px solid #c3ccda}
-@media print{body{background:#fff}.btns,#addStint,#ovl{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
+@media print{body{background:#fff}.btns,#addStint,#ovl,.pbtn,.pdel,.getbtn{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
 </style>
 </head>
 <body>
@@ -88,9 +101,13 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <tr><td>日付</td><td><input class="pin topf" type="date" data-label="日付"></td></tr>
     <tr><td>コース</td><td><input class="pin topf" data-label="コース" placeholder="例：袖ヶ浦フォレストレースウェイ"></td></tr>
     <tr><td>天候</td><td><input class="pin topf" data-label="天候" placeholder="例：晴れ／ドライ"></td></tr>
-    <tr><td>気温／路温</td><td><input class="pin topf" data-label="気温／路温" placeholder="例：32℃／45℃"></td></tr>
+    <tr><td>気温</td><td><input class="pin topf" data-label="気温" placeholder="例：32℃"></td></tr>
+    <tr><td>路温</td><td><input class="pin topf" data-label="路温" placeholder="例：45℃"></td></tr>
     <tr><td>タイヤ</td><td><input class="pin topf" data-label="タイヤ" placeholder="例：PS5 205/40R17"></td></tr>
   </table>
+  <!-- 現在地から コース(最寄りサーキット)・天候・気温 を入れる。路温は取得できない -->
+  <button id="geoBtn" class="getbtn" type="button">現在地から コース・天候・気温 を取得する</button>
+  <div id="geoStat" class="stat"></div>
   <!-- 今日の減衰・空気圧は各本の記録と同じ選択式(ボタン/ダイヤル)で入れる -->
   <div id="todaySet"></div>
   <p class="mini">減衰・空気圧は到着後に1回セットし、以降は一日中さわらない。途中で動かすと本どうしの比較が成立しません。</p>
@@ -139,12 +156,19 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
       <span class="why">向きが変わると振動・加速度の指標が本どうしで比較できなくなります。</span></span></li>
     <li><span class="b"></span><span><b>タイヤは一日中同じ面のまま</b>にする（前後ローテ・左右入れ替えをしない）</span></li>
     <li><span class="b"></span><span>ホイールナットを規定トルクで締める（前後・左右）</span></li>
-    <li><span class="b"></span><span><b>パッド残量を目視する</b>（前後・左右）
-      <span class="why">残りが1mm台に見えたら、その時点で今日は終了。</span></span></li>
+    <li><span class="b"></span><span><b>パッド残量を目視して写真を撮る</b>（前後・左右）
+      <span class="why">残りが1mm台に見えたら、その時点で今日は終了。厚みは測れないので写真と残量の段階で残す。</span></span></li>
     <li><span class="b"></span><span>車内の荷物をすべて降ろす</span></li>
     <li><span class="b"></span><span>RaceChrono が 100Hz（加速度・ジャイロON）で記録しているか確認する</span></li>
     <li><span class="b"></span><span>気温・路温をメモする。タイヤのショルダーを写真で1枚撮る（朝）</span></li>
   </ul>
+</section>
+
+<section class="card">
+  <h2>写真とパッド残量</h2>
+  <p class="mini">パッドの厚みは測れないので、<b>残量の段階と写真</b>で残す。朝と夕方の2枚を撮っておくと、その日の消費が後から追えます。</p>
+  <div id="padBlock"></div>
+  <p class="mini">写真は<b>この端末の中だけ</b>に保存されます（サーバーには送りません）。長辺1600pxに縮小して持ちます。iOSがアプリのデータを消すことがあるため、大事な写真は写真アプリにも残してください。</p>
 </section>
 
 <div id="stints"></div>
@@ -156,7 +180,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <li><span class="b"></span><span>空気圧を標準設定に戻す</span></li>
     <li><span class="b"></span><span>減衰をすべて解放</span></li>
     <li><span class="b"></span><span>3点式シートベルトを準備と4点式の片付け</span></li>
-    <li><span class="b"></span><span>パッド厚を測る（前・後／左右）</span></li>
+    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（前・後／左右）</span></li>
     <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（夕方）</span></li>
     <li><span class="b"></span><span>.rcz を 01_ログ/（走行日）/ に入れる</span></li>
     <li><span class="b"></span><span>メモをテキスト1本に統合する</span></li>
@@ -168,6 +192,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
   <button class="pr" onclick="print()">印刷</button>
   <button class="cl" onclick="askClear()">新しい走行日にする</button>
 </div>
+<div id="expStat" class="stat"></div>
 
 </div>
 
@@ -208,6 +233,190 @@ document.getElementById('todaySet').innerHTML=
   '<div class="lbl">空気圧（到着後に1回セット）1.50〜4.00・0.05刻み</div>'+
   '<div class="dials">'+dials('空気圧')+'</div>';
 const todaySet=document.getElementById('todaySet');
+
+/* ===== 写真: 端末内(IndexedDB)にだけ保存する =====
+   localStorage は約5MBで写真には足りないため IndexedDB を使う。
+   サーバーへは送らない(このアプリは静的配信で保存先が無い) */
+const PDB='predrive_photos';
+function idb(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(PDB,1);
+    r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('photos'))r.result.createObjectStore('photos');};
+    r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error);
+  });
+}
+function idbDo(mode,fn){
+  return idb().then(db=>new Promise((res,rej)=>{
+    const t=db.transaction('photos',mode), st=t.objectStore('photos');
+    let out; const rq=fn(st); if(rq)rq.onsuccess=()=>{out=rq.result;};
+    t.oncomplete=()=>res(out); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error);
+  }));
+}
+const putPhoto=(id,blob)=>idbDo('readwrite',st=>st.put(blob,id));
+const getPhoto=id=>idbDo('readonly',st=>st.get(id));
+const delPhoto=id=>idbDo('readwrite',st=>st.delete(id));
+const clearPhotos=()=>idbDo('readwrite',st=>st.clear());
+
+/* 長辺1600px・JPEGに縮小(元のままだと1枚数MBで端末の保存領域を圧迫するため) */
+async function shrink(file,max=1600,q=0.8){
+  let src=null,w=0,h=0;
+  if(window.createImageBitmap){
+    try{src=await createImageBitmap(file,{imageOrientation:'from-image'});w=src.width;h=src.height;}catch(e){src=null;}
+  }
+  if(!src){
+    src=await new Promise((res,rej)=>{
+      const im=new Image(), u=URL.createObjectURL(file);
+      im.onload=()=>{URL.revokeObjectURL(u);res(im);};
+      im.onerror=()=>{URL.revokeObjectURL(u);rej(new Error('画像を読み込めませんでした'));};
+      im.src=u;
+    });
+    w=src.naturalWidth;h=src.naturalHeight;
+  }
+  const sc=Math.min(1,max/Math.max(w,h));
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*sc)); c.height=Math.max(1,Math.round(h*sc));
+  c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+  if(src.close)src.close();
+  return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('画像を変換できませんでした')),'image/jpeg',q));
+}
+
+/* 写真1枚ぶんの部品(撮る/選ぶ・サムネイル・削除) */
+function photoSlot(id,label,disp){
+  return '<div class="photo" data-pid="'+id+'" data-label="写真 '+label+'">'+
+    '<div class="dlbl">'+(disp||label)+'</div>'+
+    '<label class="pbtn">写真を撮る／選ぶ<input type="file" accept="image/*" hidden></label>'+
+    '<div class="pv"><img alt=""><button type="button" class="pdel">この写真を削除する</button></div>'+
+    '</div>';
+}
+const PAD_LEVEL=[['十分','g'],['半分','w'],['少ない','b'],['要交換','b']];
+document.getElementById('padBlock').innerHTML=
+  seg('パッド残量（朝）',PAD_LEVEL,true)+photoSlot('pad_am','パッドの写真（朝）','写真（朝）')+
+  seg('パッド残量（夕方）',PAD_LEVEL,true)+photoSlot('pad_pm','パッドの写真（夕方）','写真（夕方）')+
+  '<div class="lbl">タイヤのショルダー</div>'+
+  photoSlot('tire_am','タイヤの写真（朝）','写真（朝）')+
+  photoSlot('tire_pm','タイヤの写真（夕方）','写真（夕方）')+
+  '<div class="lbl">スマホの固定（走行前に1枚）</div>'+
+  photoSlot('phone','スマホ固定の写真','写真');
+const padBlock=document.getElementById('padBlock');
+
+function showPhoto(slot,blob){
+  const pv=slot.querySelector('.pv'), img=pv.querySelector('img');
+  const old=img.getAttribute('src'); if(old)URL.revokeObjectURL(old);
+  if(blob){img.src=URL.createObjectURL(blob);pv.classList.add('on');}
+  else{img.removeAttribute('src');pv.classList.remove('on');}
+}
+document.querySelectorAll('.photo').forEach(slot=>{
+  const id=slot.dataset.pid;
+  slot.querySelector('input[type=file]').addEventListener('change',async ev=>{
+    const f=ev.target.files&&ev.target.files[0]; ev.target.value='';
+    if(!f)return;
+    const btn=slot.querySelector('.pbtn'); const label=btn.childNodes[0];
+    label.nodeValue='保存しています…';
+    try{
+      const small=await shrink(f);
+      await putPhoto(id,small);
+      showPhoto(slot,small);
+    }catch(e){
+      alertBig('写真を保存できませんでした。もう一度試してください');
+    }
+    label.nodeValue='写真を撮る／選ぶ';
+  });
+  slot.querySelector('.pdel').addEventListener('click',()=>{
+    ask('この写真を削除しますか?','はい、削除する',async()=>{
+      try{await delPhoto(id);}catch(e){}
+      showPhoto(slot,null);
+    });
+  });
+  getPhoto(id).then(b=>{if(b)showPhoto(slot,b);}).catch(()=>{});
+});
+
+/* ===== 現在地から コース・天候・気温 を入れる ===== */
+/* 最寄りのサーキットを名前で入れる。逆ジオコーディングだと地名しか返らず、
+   サーキット名にならないため、座標表を持って距離で選ぶ(オフラインでも動く) */
+const CIRCUITS=[
+  ['袖ヶ浦フォレストレースウェイ',35.4126,140.0206],
+  ['筑波サーキット',36.1527,140.0770],
+  ['富士スピードウェイ',35.3717,138.9267],
+  ['鈴鹿サーキット',34.8431,136.5407],
+  ['モビリティリゾートもてぎ',36.5341,140.2270],
+  ['岡山国際サーキット',34.9153,134.2206],
+  ['スポーツランドSUGO',38.1414,140.7767],
+  ['日光サーキット',36.6636,139.7889],
+  ['エビスサーキット',37.6997,140.5089],
+  ['本庄サーキット',36.2119,139.1706],
+  ['セントラルサーキット',35.0353,134.9036],
+  ['幸田サーキット',34.8506,137.1489],
+  ['オートポリス',33.0403,131.0117],
+  ['十勝スピードウェイ',42.8567,143.4553]
+];
+function kmBetween(a1,o1,a2,o2){
+  const R=6371,r=Math.PI/180;
+  const da=(a2-a1)*r, dolon=(o2-o1)*r;
+  const x=Math.sin(da/2)**2+Math.cos(a1*r)*Math.cos(a2*r)*Math.sin(dolon/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(x)));
+}
+function nearestCircuit(lat,lon){
+  let best=null;
+  CIRCUITS.forEach(c=>{const km=kmBetween(lat,lon,c[1],c[2]);if(!best||km<best.km)best={name:c[0],km:km};});
+  return best;
+}
+/* WMO の天気コードを日本語に */
+const WMO={0:'快晴',1:'晴れ',2:'薄曇り',3:'曇り',45:'霧',48:'霧',51:'霧雨',53:'霧雨',55:'霧雨',
+  56:'着氷性の霧雨',57:'着氷性の霧雨',61:'小雨',63:'雨',65:'強い雨',66:'着氷性の雨',67:'着氷性の雨',
+  71:'小雪',73:'雪',75:'大雪',77:'霧雪',80:'にわか雨',81:'強いにわか雨',82:'激しいにわか雨',
+  85:'にわか雪',86:'にわか雪',95:'雷雨',96:'雹をともなう雷雨',99:'雹をともなう雷雨'};
+function ymd(d){return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);}
+/* Open-Meteo(APIキー不要)。当日は現在値、他の日はその日の最高/最低を入れる */
+async function fetchWeather(lat,lon,dateStr){
+  const now=new Date(), t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const d=dateStr?new Date(dateStr+'T00:00:00'):t0;
+  if(isNaN(d))throw new Error('日付が読めません');
+  const diff=Math.round((d-t0)/86400000), day=ymd(d);
+  const base=(diff>=-90&&diff<=15)?'https://api.open-meteo.com/v1/forecast'
+                                  :'https://archive-api.open-meteo.com/v1/archive';
+  let u=base+'?latitude='+lat.toFixed(4)+'&longitude='+lon.toFixed(4)
+        +'&daily=weather_code,temperature_2m_max,temperature_2m_min'
+        +'&timezone=Asia%2FTokyo&start_date='+day+'&end_date='+day;
+  if(diff===0)u+='&current=temperature_2m,weather_code';
+  const r=await fetch(u,{cache:'no-store'});
+  if(!r.ok)throw new Error('取得に失敗しました');
+  const j=await r.json();
+  if(diff===0&&j.current&&j.current.temperature_2m!=null)
+    return {tenki:WMO[j.current.weather_code]||'—',temp:Math.round(j.current.temperature_2m)+'℃'};
+  const dl=j.daily;
+  if(dl&&dl.time&&dl.time.length&&dl.temperature_2m_max[0]!=null)
+    return {tenki:WMO[dl.weather_code[0]]||'—',
+            temp:'最高'+Math.round(dl.temperature_2m_max[0])+'℃／最低'+Math.round(dl.temperature_2m_min[0])+'℃'};
+  throw new Error('データがありません');
+}
+function byLabel(l){return document.querySelector('.topf[data-label="'+l+'"]');}
+const expStat=document.getElementById('expStat');
+const geoStat=document.getElementById('geoStat');
+function stat(t){geoStat.textContent=t;}
+document.getElementById('geoBtn').addEventListener('click',()=>{
+  if(!navigator.geolocation){stat('この端末では位置情報を使えません。手入力してください。');return;}
+  stat('現在地を取得しています…');
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    const lat=pos.coords.latitude, lon=pos.coords.longitude, msg=[];
+    const n=nearestCircuit(lat,lon);
+    if(n&&n.km<=8){byLabel('コース').value=n.name;msg.push('コース：'+n.name);}
+    else msg.push('近くに登録されたサーキットがありません。コースは手入力してください。'+
+                  (n?'（最寄りは'+n.name+'で約'+Math.round(n.km)+'km）':''));
+    try{
+      const dEl=byLabel('日付');
+      const w=await fetchWeather(lat,lon,dEl&&dEl.value);
+      byLabel('天候').value=w.tenki; byLabel('気温').value=w.temp;
+      msg.push('天候：'+w.tenki+'／気温：'+w.temp);
+    }catch(e){
+      msg.push('天候・気温を取得できませんでした（圏外の可能性）。手入力してください。');
+    }
+    msg.push('路温は気象データにないので手入力してください。');
+    saveState(); stat(msg.join('\n'));
+  },err=>{
+    stat(err.code===1?'位置情報が許可されていません。設定で許可するか、手入力してください。'
+                     :'現在地を取得できませんでした。手入力してください。');
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+});
 
 /* 走行1本分のカードを作る(記録は 減衰・空気圧・時刻・メモ の4種類だけ) */
 function addStint(){
@@ -274,6 +483,7 @@ function collectState(){
   const st={n:host.children.length,top:{},ck:[],seg:{},sel:{},time:{},memo:{}};
   topFields().forEach(f=>{if(f.value)st.top[f.dataset.label]=f.value;});
   collectBlock(todaySet,'T',st);
+  collectBlock(padBlock,'P',st);
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
     collectBlock(el,si,st);
@@ -293,6 +503,7 @@ function restoreState(st){
   if(!st)return;
   topFields().forEach(f=>{const v=st.top&&st.top[f.dataset.label];if(v!=null)f.value=v;});
   restoreBlock(todaySet,'T',st);
+  restoreBlock(padBlock,'P',st);
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
   document.querySelectorAll('.stint').forEach((el,si)=>{
@@ -306,7 +517,8 @@ function dumpBlock(el){
   let s='';
   el.querySelectorAll('[data-label]').forEach(f=>{
     let v='—';
-    if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
+    if(f.classList.contains('photo'))v=f.querySelector('.pv img').getAttribute('src')?'あり':'なし';
+    else if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
     else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
     else if(f.tagName==='SELECT')v=f.value||'—';
     else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
@@ -314,10 +526,11 @@ function dumpBlock(el){
   });
   return s;
 }
-function exportText(){
+async function exportText(){
   let s='■ 走行前チェック\n';
   topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
   s+=dumpBlock(todaySet);
+  s+='\n【写真とパッド残量】\n'+dumpBlock(padBlock);
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n'+dumpBlock(el);
   });
@@ -325,32 +538,63 @@ function exportText(){
   const day=(d&&d.value)||new Date().toISOString().slice(0,10);
   const fname='走行記録_'+day+'.txt';
   const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
+
+  /* テキストと保存済みの写真をまとめて共有シートに出す */
+  let files=[];
+  try{
+    files=[new File([blob],fname,{type:'text/plain'})];
+    for(const slot of document.querySelectorAll('.photo')){
+      const b=await getPhoto(slot.dataset.pid).catch(()=>null);
+      if(b)files.push(new File([b],'走行記録_'+day+'_'+slot.dataset.pid+'.jpg',{type:'image/jpeg'}));
+    }
+  }catch(e){files=[];}
   /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
   try{
-    const file=new File([blob],fname,{type:'text/plain'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:fname}).catch(()=>{});
+    if(files.length&&navigator.canShare&&navigator.canShare({files})){
+      await navigator.share({files:files,title:fname});
+      expStat.textContent='テキストと写真'+(files.length-1)+'枚を共有しました。';
       return;
     }
-  }catch(e){}
+    if(files.length&&navigator.canShare&&navigator.canShare({files:[files[0]]})){
+      await navigator.share({files:[files[0]],title:fname});
+      expStat.textContent=files.length>1
+        ?'テキストだけ共有しました。この端末では写真をまとめて共有できないため、写真は各項目から個別に保存してください。'
+        :'テキストを共有しました。';
+      return;
+    }
+  }catch(e){expStat.textContent='';return;}
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download=fname;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
+  expStat.textContent=files.length>1?'テキストを保存しました。写真は各項目から個別に保存してください。':'テキストを保存しました。';
 }
 
 /* 確認は全画面の巨大2択(OS標準の小さいダイアログは使わない) */
 const ovl=document.getElementById('ovl'),ovlTitle=document.getElementById('ovlTitle');
 let ovlAction=null;
 function ask(title,yesLabel,action){
+  document.getElementById('ovlNo').style.display='';
   ovlTitle.textContent=title;
   document.getElementById('ovlYes').textContent=yesLabel;
   ovlAction=action;ovl.classList.add('show');
 }
 document.getElementById('ovlYes').addEventListener('click',()=>{ovl.classList.remove('show');const a=ovlAction;ovlAction=null;if(a)a();});
 document.getElementById('ovlNo').addEventListener('click',()=>{ovl.classList.remove('show');ovlAction=null;});
+/* 知らせるだけの全画面表示(OS標準の alert は車内で押せないため使わない) */
+function alertBig(title){
+  ovlTitle.textContent=title;
+  document.getElementById('ovlYes').textContent='とじる';
+  document.getElementById('ovlNo').style.display='none';
+  ovlAction=()=>{document.getElementById('ovlNo').style.display='';};
+  ovl.classList.add('show');
+}
 /* 新しい走行日: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
-function askClear(){ask('今の記録をすべて消して\n新しい走行日にしますか?','はい、消して新しくする',()=>{try{localStorage.removeItem(SKEY);}catch(e){}location.reload();});}
+function askClear(){ask('今の記録と写真をすべて消して\n新しい走行日にしますか?','はい、消して新しくする',async()=>{
+  try{localStorage.removeItem(SKEY);}catch(e){}
+  try{await clearPhotos();}catch(e){}
+  location.reload();
+});}
 
 /* 保存済みの本数でカードを作ってから復元し、そのあと保存を有効化
    (復元中に保存が走ると、書き戻す前の空の状態で上書きしてしまう) */

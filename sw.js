@@ -1,6 +1,6 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v65";
+const CACHE = "checklist-v66";
 const ASSETS = [
   "./",
   "./index.html",
@@ -29,6 +29,10 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+
+  /* 外部への通信(気象API など)はSWを素通りさせる。
+     ここで扱うと失敗時に index.html を返してしまい、JSONとして読めなくなる */
+  if (new URL(e.request.url).origin !== self.location.origin) return;
 
   /* アプリ本体(index.html)だけネットワーク優先で最新を即反映。
      pre.html は iframe のサブ文書なのでシェル扱いにしない
