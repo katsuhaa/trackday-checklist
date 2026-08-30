@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>8/8 袖ヶ浦 走行前ブリーフ</title>
+<title>走行前チェック</title>
 <style>
 :root{--ink:#1f2430;--sub:#5b6472;--line:#e3e7ee;--bg:#f6f8fb;--card:#fff;--blue:#2563eb;--teal:#0d9488;--red:#dc2626;--amber:#b45309;--green:#0f9d58}
 *{box-sizing:border-box}
@@ -20,7 +20,7 @@ header p{margin:0;font-size:17px;color:#d7deea}
 .card.no{border-left:4px solid var(--red)}
 table.kv{width:100%;border-collapse:collapse;font-size:17px}
 table.kv td{padding:9px 4px;border-bottom:1px solid var(--line);vertical-align:top}
-table.kv td:first-child{color:var(--sub);width:22%;white-space:nowrap}
+table.kv td:first-child{color:var(--sub);width:24%;white-space:nowrap}
 .mini{font-size:15px;color:var(--sub);margin:10px 0 0}
 ul.ck{list-style:none;margin:0;padding:0}
 ul.ck li{display:flex;gap:12px;align-items:flex-start;padding:11px 4px;font-size:19px;cursor:pointer}
@@ -42,7 +42,7 @@ ul.ck li.on .why{color:#c2c8d0}
 /* 減衰(前戻し/後ろ戻し)は選択肢が多く折り返すので、ボタンを固定幅にして
    全部同じ大きさにする(伸ばして揃えると最終行だけ大きくなり崩れるため) */
 .seg[data-label*="戻し"] button{flex:0 0 auto;width:64px;min-width:0;padding:11px 0;text-align:center}
-/* 温間圧はダイヤル(select)で入力。iPhoneではホイール式ピッカーが開く */
+/* 空気圧はダイヤル(select)で入力。iPhoneではホイール式ピッカーが開く */
 .dials{display:flex;flex-wrap:wrap;gap:8px;margin-top:2px}
 .dwrap{flex:1 1 46%;min-width:120px;display:flex;flex-direction:column;gap:3px}
 .dlbl{font-size:15px;color:var(--sub);font-weight:700}
@@ -53,43 +53,57 @@ ul.ck li.on .why{color:#c2c8d0}
 .time button{font:inherit;font-size:17px;background:#374151;color:#fff;border:0;border-radius:9px;padding:11px 15px;min-height:52px;cursor:pointer}
 .tv{font-weight:800;font-size:22px}
 textarea{width:100%;min-height:64px;font:inherit;font-size:17px;padding:9px;border:1px solid #cfd6e0;border-radius:8px;margin-top:4px}
-input.pin{width:100%;max-width:230px;font:inherit;font-size:18px;padding:11px;border:1px solid #cfd6e0;border-radius:8px}
+textarea.big{min-height:82px}
+input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #cfd6e0;border-radius:8px}
 .hr{height:1px;background:var(--line);margin:13px -14px}
 .tech{font-size:16px;color:var(--sub);line-height:1.7}
 .tech b{color:var(--ink)}
+/* 走行を1本増やす。巨大ボタン(グローブ前提でも押せる大きさ) */
+#addStint{width:100%;font:inherit;font-size:19px;font-weight:700;color:var(--blue);background:#fff;
+  border:2px dashed #b9c4d4;border-radius:13px;padding:18px 10px;min-height:64px;cursor:pointer;margin:4px 0 0}
 .btns{display:flex;gap:9px;margin:14px 0}
 .btns button{flex:1;font:inherit;font-size:17px;font-weight:700;border:0;border-radius:10px;padding:15px 10px;cursor:pointer}
 .exp{background:var(--blue);color:#fff}.pr{background:#374151;color:#fff}.cl{background:#eef1f6;color:#475569}
-#out{width:100%;min-height:130px;font-size:12px;font-family:ui-monospace,monospace;border:1px solid #cfd6e0;border-radius:8px;padding:8px;display:none}
-@media print{body{background:#fff}.btns,#out{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
+/* 確認は全画面の巨大2択。OS標準の小さいダイアログ(confirm)は車内で押せないため使わない */
+#ovl{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;gap:26px;background:var(--bg);padding:26px 20px}
+#ovl.show{display:flex}
+#ovlTitle{font-size:23px;font-weight:800;text-align:center;line-height:1.5;white-space:pre-line}
+#ovl button{flex:1;font:inherit;font-size:24px;font-weight:800;border-radius:22px;cursor:pointer}
+#ovlYes{background:var(--red);color:#fff;border:0}
+#ovlNo{background:#fff;color:var(--ink);border:3px solid #c3ccda}
+@media print{body{background:#fff}.btns,#addStint,#ovl{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
 <header>
-  <h1>8/8(金) 袖ヶ浦 — 走行前ブリーフ</h1>
-  <p>主目的は<b>滑らせながら向きを変える操作に慣れる</b>こと。ブレーキを残したままノーズを向けて、<b>回りながら速度を落とす</b>。狙いは滑りの量ではなく<b>毎周同じにすること</b>。</p>
+  <h1>走行前チェック</h1>
+  <p>走行日ごとに<b>今日の狙い</b>と<b>今日やらないこと</b>を書き、各本の減衰・空気圧・時刻を記録する。</p>
 </header>
 
 <section class="card">
-  <h2>セット（触らない）</h2>
+  <h2>今日の走行</h2>
   <table class="kv">
-    <tr><td>タイヤ</td><td>PS5 205/40R17（4本ともショルダー削れ）</td></tr>
-    <tr><td>減衰</td><td><b>前1戻し・後8戻し</b>（8/1 2本目と同一・全閉=0から数える）／一日中変えない</td></tr>
-    <tr><td>空気圧</td><td>到着後に1回セット → 以降さわらない／判断は必ず<b>温間 F2.6・R2.0</b></td></tr>
+    <tr><td>日付</td><td><input class="pin topf" type="date" data-label="日付"></td></tr>
+    <tr><td>コース</td><td><input class="pin topf" data-label="コース" placeholder="例：袖ヶ浦フォレストレースウェイ"></td></tr>
+    <tr><td>天候</td><td><input class="pin topf" data-label="天候" placeholder="例：晴れ／ドライ"></td></tr>
+    <tr><td>気温／路温</td><td><input class="pin topf" data-label="気温／路温" placeholder="例：32℃／45℃"></td></tr>
+    <tr><td>タイヤ</td><td><input class="pin topf" data-label="タイヤ" placeholder="例：PS5 205/40R17"></td></tr>
+    <tr><td>減衰</td><td><input class="pin topf" data-label="減衰" placeholder="例：前1戻し・後8戻し（全閉=0から数える）"></td></tr>
+    <tr><td>空気圧</td><td><input class="pin topf" data-label="空気圧の目標" placeholder="例：温間 F2.6 / R2.0"></td></tr>
   </table>
-  <p class="mini">減衰・空気圧を動かすと 8/1 との比較が成立しません。8/23 にタイヤ(RE-71RZ)・バネ(F12/R7)・ピロアッパーが入り現行設定のデータは断絶するので、8/8 は 8/1 と直接比べられる数少ない1日です。低グリップは前提であって不調ではないため、タイムは今日の評価軸にしません。</p>
+  <p class="mini">減衰・空気圧は到着後に1回セットし、以降は一日中さわらない。途中で動かすと本どうしの比較が成立しません。</p>
 </section>
 
 <section class="card">
-  <h2>成功条件（この4つが揃えば今日は成功）</h2>
-  <div class="tech">
-    <b>① 滑りの再現性：</b>4HP と最終で、滑りの量が毎周同じに近づく（8/1 は周ごとの幅が 4HP 40.7・最終 35.0 mrad/s と全コーナーで最大）。<br>
-    <b>② 3C：</b>ボトム速度のばらつきが縮む（8/1 は ±6.9km/h で全コーナー最大）。<br>
-    <b>③ 9HP：</b>ボトム速度 55km/h 台。制動開始点は 8/1 のまま。<br>
-    <b>④ 条件が最後まで揃っている：</b>減衰・空気圧・スマホの固定・タイヤの面を一日中変えていない。これが崩れると上の3つは測れません。優先度はこれが一番上です。
-  </div>
+  <h2>今日の狙い</h2>
+  <textarea class="big topf" data-label="今日の狙い" placeholder="例：滑らせながら向きを変える操作に慣れる。狙いは滑りの量ではなく毎周同じにすること"></textarea>
+</section>
+
+<section class="card no">
+  <h2>今日やらないこと</h2>
+  <textarea class="big topf" data-label="今日やらないこと" placeholder="例：走行中に減衰・空気圧を変えない／タイムを目標にしない"></textarea>
 </section>
 
 <section class="card">
@@ -118,47 +132,23 @@ input.pin{width:100%;max-width:230px;font:inherit;font-size:18px;padding:11px;bo
 <section class="card">
   <h2>走行前チェックリスト</h2>
   <ul class="ck">
-    <li><span class="b"></span><span>減衰を <b>前1戻し・後8戻し</b> にセットする（8/1 2本目と同一。全閉=0から数える）
-      <span class="why">ここを変えると 8/1 との比較が成立しません。</span></span></li>
-    <li><span class="b"></span><span>空気圧を到着後に1回セットする → 以降さわらない。判断は必ず<b>温間 F2.6 / R2.0</b></span></li>
+    <li><span class="b"></span><span>減衰を今日の設定にセットする（上の「今日の走行」に書いた値）
+      <span class="why">走行中に動かすと本どうしの比較が成立しません。</span></span></li>
+    <li><span class="b"></span><span>空気圧を到着後に1回セットする → 以降さわらない。判断は必ず温間で行う</span></li>
     <li><span class="b"></span><span><b>スマホの固定を絶対に変えない。</b>走行前に取り付けの写真を1枚撮る
-      <span class="why">8/1 は2本の間に向きが約18°変わり（φ 66.5°→85.0°）、振動の指標が比較不能になりました。</span></span></li>
+      <span class="why">向きが変わると振動・加速度の指標が本どうしで比較できなくなります。</span></span></li>
     <li><span class="b"></span><span><b>タイヤは一日中同じ面のまま</b>にする（前後ローテ・左右入れ替えをしない）</span></li>
-    <li><span class="b"></span><span><b>パッド残量を目視する</b>（前後・左右）。7/25 時点で 前3mm・後2mm、消費は約1.5mm/日
-      <span class="why">前が1mm台に見えたら、その時点で今日は終了。</span></span></li>
+    <li><span class="b"></span><span>ホイールナットを規定トルクで締める（前後・左右）</span></li>
+    <li><span class="b"></span><span><b>パッド残量を目視する</b>（前後・左右）
+      <span class="why">残りが1mm台に見えたら、その時点で今日は終了。</span></span></li>
+    <li><span class="b"></span><span>車内の荷物をすべて降ろす</span></li>
     <li><span class="b"></span><span>RaceChrono が 100Hz（加速度・ジャイロON）で記録しているか確認する</span></li>
     <li><span class="b"></span><span>気温・路温をメモする。タイヤのショルダーを写真で1枚撮る（朝）</span></li>
   </ul>
 </section>
 
 <div id="stints"></div>
-
-<section class="card">
-  <h2>コーナー別の狙い</h2>
-  <div class="tech">
-    <b>最終・4HP＝手本。</b>すでにできている2か所（最終＝待ち0.003秒・谷0.016、4HP＝待ち0.042秒・谷0.119、ともにコース最小級）。直すのではなく<b>毎周同じだけ滑らせる</b>。半径は触らない（広く回るほど速い側：4HP −0.031／最終 −0.027 秒/m）。<br>
-    <b>8C＝入口で早めにノーズを向け、車を早くまっすぐにしてから開ける。</b>制動は 7/19 と同一で直すところなし。出口 1620–1670m の加速G が 0.061（7/19 は 0.122）と足りていない。早く向きが変われば、その分早く踏める。<br>
-    <b>3C＝まっすぐ止めきってから曲げる。</b>今の進入速度のまま向きを足すと悪化する（合成G 0.874 で余力なし）。試すなら<b>進入速度を落として、余った分を向きに使う</b>。見る指標はボトム速度のばらつき。<br>
-    <b>9HP＝ボトム速度を 55km/h 台に乗せる。</b>制動開始を遅らせるのは禁止（8/1 の 14m 遅らせがオーバースピードの正体）。1741m 付近で減速が 0.3G 落ちるのは路面なので、そこで修正しようとしない。<br>
-    <b>1C＝Rmin を毎周 68m 台に。</b>強く踏まない・向きも作らない（どちらも半径を殺す）。<br>
-    <b>2C・5・6・7＝触らない。</b>すでに安定しているので今日は現状維持。<br>
-    <b>運用＝2周アタック → 1周クールダウン。</b>熱だれは最初から出ている前提で組む。アタック周でない周も練習に使い、1本に1〜2周<b>「向きを変えるだけの周」</b>を意識的に作る。
-  </div>
-</section>
-
-<section class="card no">
-  <h2>今日やらないこと</h2>
-  <div class="tech">
-    ・<b>3C で、今の進入速度のまま向きを足さない。</b>試すなら進入を落としてから。<br>
-    ・<b>1C・4HP・最終でブレーキを強くしない・突っ込みを増やさない。</b>半径が死んで遅くなる。<br>
-    ・<b>「もっと滑らせる」を目標にしない。</b>今日の狙いは量ではなく再現性。<br>
-    ・<b>制動開始を遅らせない</b>（特に 9HP）。<br>
-    ・<b>9HP・3C・8C でラインを広げない。</b>この3か所は広く回るほど遅い。<br>
-    ・<b>走行中に減衰・空気圧を変えない。</b>変えたらその本は比較から外す。<br>
-    ・<b>タイヤのローテ・左右入れ替えをしない。</b><br>
-    ・<b>タイムを目標にしない。</b>
-  </div>
-</section>
+<button id="addStint" type="button">＋ 走行を1本追加する</button>
 
 <section class="card">
   <h2>走行後</h2>
@@ -168,7 +158,7 @@ input.pin{width:100%;max-width:230px;font:inherit;font-size:18px;padding:11px;bo
     <li><span class="b"></span><span>3点式シートベルトを準備と4点式の片付け</span></li>
     <li><span class="b"></span><span>パッド厚を測る（前・後／左右）</span></li>
     <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（夕方）</span></li>
-    <li><span class="b"></span><span>.rcz を 01_ログ/2026-08-08/ に入れる</span></li>
+    <li><span class="b"></span><span>.rcz を 01_ログ/（走行日）/ に入れる</span></li>
     <li><span class="b"></span><span>メモをテキスト1本に統合する</span></li>
   </ul>
 </section>
@@ -176,78 +166,91 @@ input.pin{width:100%;max-width:230px;font:inherit;font-size:18px;padding:11px;bo
 <div class="btns">
   <button class="exp" onclick="exportText()">ファイルに保存</button>
   <button class="pr" onclick="print()">印刷</button>
-  <button class="cl" onclick="clearAll()">クリア</button>
+  <button class="cl" onclick="askClear()">新しい走行日にする</button>
 </div>
 
 </div>
+
+<!-- 確認: 全画面・巨大2択 -->
+<div id="ovl">
+  <div id="ovlTitle"></div>
+  <button id="ovlYes" type="button">はい</button>
+  <button id="ovlNo" type="button">やめる</button>
+</div>
+
 <script>
 /* 減衰: 1〜19 に、最も緩い側の「全開」を末尾に追加 */
 const NOTCH=Array.from({length:19},(_,k)=>String(k+1)).concat(['全開']);
 const FRONT=NOTCH, REAR=NOTCH;
 /* 入力内容を保存/復元(iPhoneがアプリを再読込しても記録が消えないように)。
-   キーはイベントごとに変える(前回の記録が新イベントに復元されないため) */
-const SKEY='predrive_state_8-8';
+   汎用ページなのでキーは固定。走行日を変えるときは「新しい走行日にする」で消す */
+const SKEY='predrive_state';
+const WHEELS=['FL','FR','RL','RR'];
+const MAX_STINTS=12;
 let ready=false;
-/* 8/8 は減衰を動かさない日なので、3本とも 前1・後8戻し をプリセットする */
-const STINTS=[
- {c:'s1',t:'1本目 — 最終と4HPを基準に置く',r:'すでにできている2か所の感触を確かめる。もっと滑らせるのではなく、毎周同じだけ滑らせる',f:'1',rr:'8'},
- {c:'s2',t:'2本目 — 8Cに持ち込む',r:'入口で早めにノーズを向け、まっすぐにしてから開ける。3Cは進入を落として試す周を作る',f:'1',rr:'8'},
- {c:'s3',t:'3本目 — 再現性の確認',r:'9HPのボトムを55km/h台に乗せる(制動開始は8/1のまま)。4HP・最終の滑りが毎周そろっているか',f:'1',rr:'8'}
-];
-const RATE=[
- ['スマホの固定を触ったか',[['触っていない','g'],['触った','b']]],
- ['滑りの出方 最終',[['毎周同じ','g'],['ややばらつく','w'],['ばらつく','b']]],
- ['滑りの出方 4HP',[['毎周同じ','g'],['ややばらつく','w'],['ばらつく','b']]],
- ['8C 入口で向きを作れたか',[['作れた','g'],['少し作れた','w'],['止めてから曲げた','b']]],
- ['3C 入口の感触',[['まっすぐ止めきれた','g'],['進入を落として試した','w'],['速度を残したまま踏んだ','b']]],
- ['3C ボトムのばらつき',[['そろった','g'],['ばらつく','b']]],
- ['9HP 入口の感触',[['ボトム55km/h台に乗った','g'],['落としすぎた','w'],['オーバースピード','b']]],
- ['1C 半径',[['広く回れた','g'],['小さく回った','b']]]
-];
+
+const host=document.getElementById('stints');
+
 function seg(lbl,opts,col){
   const b=opts.map(o=>{const[t,c]=Array.isArray(o)?o:[o,'n'];return `<button data-c="${col?c:'n'}" onclick="pick(this)">${t}</button>`}).join('');
   return `<div class="lbl">${lbl}</div><div class="seg" data-label="${lbl}">${b}</div>`;
 }
-/* 温間圧ダイヤル: 1.50〜4.00 を 0.05刻み(浮動小数の誤差を避けるため整数で生成) */
+/* 空気圧ダイヤル: 1.50〜4.00 を 0.05刻み(浮動小数の誤差を避けるため整数で生成) */
 function pOptions(){let o='<option value="">—</option>';for(let i=150;i<=400;i+=5){const s=(i/100).toFixed(2);o+=`<option value="${s}">${s}</option>`;}return o;}
-function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="温間${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
-const host=document.getElementById('stints');
-STINTS.forEach(s=>{
-  const rate=RATE.map(r=>seg(r[0],r[1],true)).join('');
-  const el=document.createElement('div'); el.className='stint '+s.c; el.dataset.t=s.t;
+function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
+function dials(prefix){return WHEELS.map(w=>dial(prefix+' '+w)).join('');}
+
+/* 走行1本分のカードを作る(記録は 減衰・空気圧・時刻・メモ の4種類だけ) */
+function addStint(){
+  const n=host.children.length+1;
+  if(n>MAX_STINTS)return null;
+  const title=n+'本目';
+  const el=document.createElement('div');
+  el.className='stint s'+((n-1)%3+1);
+  el.dataset.t=title;
   el.innerHTML=`
-    <div class="sh"><b>${s.t}</b><span class="r">${s.r}</span></div>
+    <div class="sh"><b>${title}</b></div>
     <div class="sb">
-      <div class="lbl">この本の減衰（最強から数える）／8/8は前1・後8のまま動かさない</div>
+      <div class="lbl">この本の減衰（最強から数える）</div>
       ${seg('前 戻し',FRONT,false)}${seg('後ろ 戻し',REAR,false)}
-      <div class="lbl">温間圧（走行前）目標 F2.6／R2.0</div>
-      <div class="dials">${dial('前F')}${dial('前R')}</div>
-      <div class="lbl">気温／路温</div>
-      <input class="pin" data-label="気温／路温" placeholder="例：32℃／45℃">
+      <div class="lbl">空気圧（走行前）1.50〜4.00・0.05刻み</div>
+      <div class="dials">${dials('走行前')}</div>
       <div class="hr"></div>
-      <div class="lbl">走行後</div>
+      <div class="lbl">走行時刻</div>
       <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
-      ${rate}
-      <div class="lbl">温間圧（走行直後）1.50〜4.00・0.05刻み</div>
-      <div class="dials">${dial('F左')}${dial('F右')}${dial('R左')}${dial('R右')}</div>
-      <div class="lbl">メモ（前の本と比べて・向きを変えるだけの周の感触）</div>
-      <textarea data-label="メモ" placeholder="例：最終は毎周同じ／8C出口まだ踏めない"></textarea>
+      <div class="lbl">空気圧（走行直後）1.50〜4.00・0.05刻み</div>
+      <div class="dials">${dials('走行後')}</div>
+      <div class="lbl">メモ（前の本と比べてどうだったか）</div>
+      <textarea data-label="メモ" placeholder="例：前の本より安定した／出口でまだ踏めない"></textarea>
     </div>`;
   host.appendChild(el);
-  if(s.f) presetSeg(el,'前 戻し',s.f);
-  if(s.rr) presetSeg(el,'後ろ 戻し',s.rr);
+  return el;
+}
+function buildStints(count){
+  host.textContent='';
+  for(let k=0;k<count;k++)addStint();
+}
+
+document.getElementById('addStint').addEventListener('click',()=>{
+  const el=addStint();
+  if(!el)return;
+  el.querySelector('textarea').addEventListener('input',saveState);
+  saveState();
+  el.scrollIntoView({behavior:'smooth',block:'start'});
 });
-function presetSeg(el,lbl,v){const g=[...el.querySelectorAll('.seg')].find(x=>x.dataset.label===lbl);if(g)[...g.children].forEach(b=>{if(b.textContent===v)pick(b)})}
+
 document.addEventListener('click',e=>{const li=e.target.closest('ul.ck li');if(li){li.classList.toggle('on');saveState();}});
 /* 選択中のボタンをもう一度押すと選択解除(未選択に戻す) */
 function pick(btn){const wasOn=btn.classList.contains('on');[...btn.parentElement.children].forEach(x=>x.classList.remove('on','g','w','b','n'));if(!wasOn)btn.classList.add('on',btn.dataset.c||'n');saveState();}
 function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').textContent=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);saveState();}
 
 /* ---- 保存/復元 ---- */
-/* ダイヤル(select)と気温/路温(input)はまとめて st.sel に入れる */
+/* ダイヤル(select)はまとめて st.sel に入れる */
 function fields(el){return el.querySelectorAll('select,input.pin');}
+function topFields(){return document.querySelectorAll('.topf');}
 function collectState(){
-  const st={ck:[],seg:{},sel:{},time:{},memo:{}};
+  const st={n:host.children.length,top:{},ck:[],seg:{},sel:{},time:{},memo:{}};
+  topFields().forEach(f=>{if(f.value)st.top[f.dataset.label]=f.value;});
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
     el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[si+'|'+sg.dataset.label]=on.textContent;});
@@ -258,12 +261,15 @@ function collectState(){
   return st;
 }
 function saveState(){if(!ready)return;try{localStorage.setItem(SKEY,JSON.stringify(collectState()));}catch(e){}}
-function restoreState(){
+function readState(){
   let st;try{st=JSON.parse(localStorage.getItem(SKEY));}catch(e){}
-  /* 形式が違う古い保存(配列など)は無視する。中途半端に復元するとプリセットだけ消える */
-  if(!st||typeof st!=='object'||Array.isArray(st))return;
-  /* 保存済み状態を正とする(プリセットや前回の選択解除を反映するため一旦クリア) */
-  document.querySelectorAll('.stint .seg button.on').forEach(b=>b.classList.remove('on','g','w','b','n'));
+  /* 形式が違う古い保存(配列など)は無視する。中途半端に復元すると表示が崩れる */
+  if(!st||typeof st!=='object'||Array.isArray(st))return null;
+  return st;
+}
+function restoreState(st){
+  if(!st)return;
+  topFields().forEach(f=>{const v=st.top&&st.top[f.dataset.label];if(v!=null)f.value=v;});
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
   document.querySelectorAll('.stint').forEach((el,si)=>{
@@ -277,7 +283,8 @@ function restoreState(){
   });
 }
 function exportText(){
-  let s='■ 8/8 袖ヶ浦 走行前ブリーフ\n';
+  let s='■ 走行前チェック\n';
+  topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n';
     el.querySelectorAll('[data-label]').forEach(f=>{
@@ -289,7 +296,9 @@ function exportText(){
       s+='  '+f.dataset.label+'：'+v+'\n';
     });
   });
-  const fname='袖ヶ浦_8-8_走行前ブリーフ_記録.txt';
+  const d=[...topFields()].find(f=>f.dataset.label==='日付');
+  const day=(d&&d.value)||new Date().toISOString().slice(0,10);
+  const fname='走行記録_'+day+'.txt';
   const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
   /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
   try{
@@ -305,15 +314,26 @@ function exportText(){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 
-/* クリア: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
-function clearAll(){if(confirm('消す?')){try{localStorage.removeItem(SKEY);}catch(e){}location.reload();}}
+/* 確認は全画面の巨大2択(OS標準の小さいダイアログは使わない) */
+const ovl=document.getElementById('ovl'),ovlTitle=document.getElementById('ovlTitle');
+let ovlAction=null;
+function ask(title,yesLabel,action){
+  ovlTitle.textContent=title;
+  document.getElementById('ovlYes').textContent=yesLabel;
+  ovlAction=action;ovl.classList.add('show');
+}
+document.getElementById('ovlYes').addEventListener('click',()=>{ovl.classList.remove('show');const a=ovlAction;ovlAction=null;if(a)a();});
+document.getElementById('ovlNo').addEventListener('click',()=>{ovl.classList.remove('show');ovlAction=null;});
+/* 新しい走行日: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
+function askClear(){ask('今の記録をすべて消して\n新しい走行日にしますか?','はい、消して新しくする',()=>{try{localStorage.removeItem(SKEY);}catch(e){}location.reload();});}
 
-/* 保存済みの入力を復元してから保存を有効化(復元中の上書きを防ぐ) */
-restoreState();
-document.querySelectorAll('.stint textarea, .stint input.pin').forEach(t=>t.addEventListener('input',saveState));
+/* 保存済みの本数でカードを作ってから復元し、そのあと保存を有効化
+   (復元中に保存が走ると、書き戻す前の空の状態で上書きしてしまう) */
+const saved=readState();
+buildStints((saved&&saved.n)||3);
+restoreState(saved);
+document.querySelectorAll('.stint textarea, .topf').forEach(t=>t.addEventListener('input',saveState));
 ready=true;
-/* 初回(保存なし)はプリセットを基準として保存(これがないと、プリセット解除→再読込で解除が消える) */
-if(!localStorage.getItem(SKEY))saveState();
 </script>
 </body>
 </html>
