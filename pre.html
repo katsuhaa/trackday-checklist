@@ -90,9 +90,9 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <tr><td>天候</td><td><input class="pin topf" data-label="天候" placeholder="例：晴れ／ドライ"></td></tr>
     <tr><td>気温／路温</td><td><input class="pin topf" data-label="気温／路温" placeholder="例：32℃／45℃"></td></tr>
     <tr><td>タイヤ</td><td><input class="pin topf" data-label="タイヤ" placeholder="例：PS5 205/40R17"></td></tr>
-    <tr><td>減衰</td><td><input class="pin topf" data-label="減衰" placeholder="例：前1戻し・後8戻し（全閉=0から数える）"></td></tr>
-    <tr><td>空気圧</td><td><input class="pin topf" data-label="空気圧の目標" placeholder="例：温間 F2.6 / R2.0"></td></tr>
   </table>
+  <!-- 今日の減衰・空気圧は各本の記録と同じ選択式(ボタン/ダイヤル)で入れる -->
+  <div id="todaySet"></div>
   <p class="mini">減衰・空気圧は到着後に1回セットし、以降は一日中さわらない。途中で動かすと本どうしの比較が成立しません。</p>
 </section>
 
@@ -132,7 +132,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 <section class="card">
   <h2>走行前チェックリスト</h2>
   <ul class="ck">
-    <li><span class="b"></span><span>減衰を今日の設定にセットする（上の「今日の走行」に書いた値）
+    <li><span class="b"></span><span>減衰を今日の設定にセットする（上の「今日の走行」で選んだ値）
       <span class="why">走行中に動かすと本どうしの比較が成立しません。</span></span></li>
     <li><span class="b"></span><span>空気圧を到着後に1回セットする → 以降さわらない。判断は必ず温間で行う</span></li>
     <li><span class="b"></span><span><b>スマホの固定を絶対に変えない。</b>走行前に取り付けの写真を1枚撮る
@@ -200,6 +200,15 @@ function pOptions(){let o='<option value="">—</option>';for(let i=150;i<=400;i
 function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
 function dials(prefix){return WHEELS.map(w=>dial(prefix+' '+w)).join('');}
 
+/* 今日の減衰・空気圧。各本の記録と同じ部品(ボタン/ダイヤル)を使って
+   手入力をなくす(値の書き方がぶれると本どうしで比較できないため) */
+document.getElementById('todaySet').innerHTML=
+  '<div class="lbl">減衰（最強から数える）</div>'+
+  seg('前 戻し',FRONT,false)+seg('後ろ 戻し',REAR,false)+
+  '<div class="lbl">空気圧（到着後に1回セット）1.50〜4.00・0.05刻み</div>'+
+  '<div class="dials">'+dials('空気圧')+'</div>';
+const todaySet=document.getElementById('todaySet');
+
 /* 走行1本分のカードを作る(記録は 減衰・空気圧・時刻・メモ の4種類だけ) */
 function addStint(){
   const n=host.children.length+1;
@@ -248,13 +257,26 @@ function stamp(btn){const d=new Date();btn.parentElement.querySelector('.tv').te
 /* ダイヤル(select)はまとめて st.sel に入れる */
 function fields(el){return el.querySelectorAll('select,input.pin');}
 function topFields(){return document.querySelectorAll('.topf');}
+/* ボタン(.seg)とダイヤル(select)は「今日の走行」と各本で同じ作りなので、
+   ブロック単位でまとめて保存/復元する(キーは 'T'=今日の走行 / 0,1,2…=各本) */
+function collectBlock(el,key,st){
+  el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[key+'|'+sg.dataset.label]=on.textContent;});
+  fields(el).forEach(f=>{if(f.value)st.sel[key+'|'+f.dataset.label]=f.value;});
+}
+function restoreBlock(el,key,st){
+  el.querySelectorAll('.seg').forEach(sg=>{
+    const v=st.seg&&st.seg[key+'|'+sg.dataset.label];
+    if(v!=null)[...sg.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)pick(b);});
+  });
+  fields(el).forEach(f=>{const v=st.sel&&st.sel[key+'|'+f.dataset.label];if(v!=null)f.value=v;});
+}
 function collectState(){
   const st={n:host.children.length,top:{},ck:[],seg:{},sel:{},time:{},memo:{}};
   topFields().forEach(f=>{if(f.value)st.top[f.dataset.label]=f.value;});
+  collectBlock(todaySet,'T',st);
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
-    el.querySelectorAll('.seg').forEach(sg=>{const on=sg.querySelector('button.on');if(on)st.seg[si+'|'+sg.dataset.label]=on.textContent;});
-    fields(el).forEach(f=>{if(f.value)st.sel[si+'|'+f.dataset.label]=f.value;});
+    collectBlock(el,si,st);
     const tv=el.querySelector('.time .tv');if(tv&&tv.textContent&&tv.textContent!=='—')st.time[si]=tv.textContent;
     const ta=el.querySelector('textarea');if(ta&&ta.value.trim())st.memo[si]=ta.value;
   });
@@ -270,31 +292,34 @@ function readState(){
 function restoreState(st){
   if(!st)return;
   topFields().forEach(f=>{const v=st.top&&st.top[f.dataset.label];if(v!=null)f.value=v;});
+  restoreBlock(todaySet,'T',st);
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
   document.querySelectorAll('.stint').forEach((el,si)=>{
-    el.querySelectorAll('.seg').forEach(sg=>{
-      const v=st.seg&&st.seg[si+'|'+sg.dataset.label];
-      if(v!=null)[...sg.querySelectorAll('button')].forEach(b=>{if(b.textContent===v)pick(b);});
-    });
-    fields(el).forEach(f=>{const v=st.sel&&st.sel[si+'|'+f.dataset.label];if(v!=null)f.value=v;});
+    restoreBlock(el,si,st);
     if(st.time&&st.time[si]!=null){const tv=el.querySelector('.time .tv');if(tv)tv.textContent=st.time[si];}
     if(st.memo&&st.memo[si]!=null){const ta=el.querySelector('textarea');if(ta)ta.value=st.memo[si];}
   });
 }
+/* ブロック内の入力を「ラベル：値」で書き出す */
+function dumpBlock(el){
+  let s='';
+  el.querySelectorAll('[data-label]').forEach(f=>{
+    let v='—';
+    if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
+    else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
+    else if(f.tagName==='SELECT')v=f.value||'—';
+    else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
+    s+='  '+f.dataset.label+'：'+v+'\n';
+  });
+  return s;
+}
 function exportText(){
   let s='■ 走行前チェック\n';
   topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
+  s+=dumpBlock(todaySet);
   document.querySelectorAll('.stint').forEach(el=>{
-    s+='\n【'+el.dataset.t+'】\n';
-    el.querySelectorAll('[data-label]').forEach(f=>{
-      let v='—';
-      if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
-      else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
-      else if(f.tagName==='SELECT')v=f.value||'—';
-      else if(f.tagName==='TEXTAREA'||f.tagName==='INPUT')v=f.value.trim()||'—';
-      s+='  '+f.dataset.label+'：'+v+'\n';
-    });
+    s+='\n【'+el.dataset.t+'】\n'+dumpBlock(el);
   });
   const d=[...topFields()].find(f=>f.dataset.label==='日付');
   const day=(d&&d.value)||new Date().toISOString().slice(0,10);
