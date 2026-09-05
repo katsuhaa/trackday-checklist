@@ -1,6 +1,7 @@
 /* 出走前チェックリスト - オフラインキャッシュ
-   更新時は CACHE のバージョン番号を上げてから再デプロイすること */
-const CACHE = "checklist-v69";
+   更新時は CACHE のバージョン番号を上げてから再デプロイすること
+   (pre.html の画面下に出る「版」の表示も同じ番号に合わせる) */
+const CACHE = "checklist-v70";
 const ASSETS = [
   "./",
   "./index.html",
@@ -14,7 +15,12 @@ const ASSETS = [
 self.addEventListener("install", e => {
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
+      /* addAll は1つでも取得に失敗すると install ごと失敗し、古いSWが
+         残り続けて更新が止まる。1件ずつ入れて失敗は握りつぶす。
+         cache:"reload" でHTTPキャッシュを迂回し、必ず新しい実体を取る */
+      .then(c => Promise.all(
+        ASSETS.map(u => c.add(new Request(u, { cache: "reload" })).catch(() => {}))
+      ))
       .then(() => self.skipWaiting())
   );
 });
@@ -34,11 +40,14 @@ self.addEventListener("fetch", e => {
      ここで扱うと失敗時に index.html を返してしまい、JSONとして読めなくなる */
   if (new URL(e.request.url).origin !== self.location.origin) return;
 
-  /* アプリ本体(index.html)だけネットワーク優先で最新を即反映。
-     pre.html は iframe のサブ文書なのでシェル扱いにしない
-     (ここでネットワーク優先にすると index.html のキャッシュを上書きしてしまう) */
-  const isSubDoc = /pre\.html$/.test(new URL(e.request.url).pathname);
-  if (e.request.mode === "navigate" && !isSubDoc) {
+  /* index.html と pre.html はどちらもネットワーク優先で最新を即反映する。
+     pre.html は iframe のサブ文書だが同じく navigate なので同じ扱いにする。
+     取得したものは「そのページ自身のキー」に保存する
+     (以前はどちらも ./index.html のキーに入れていたため、pre.html を
+      ネットワーク優先にできず、キャッシュが入れ替わるまで古いままだった) */
+  if (e.request.mode === "navigate") {
+    const key = /pre\.html$/.test(new URL(e.request.url).pathname)
+      ? "./pre.html" : "./index.html";
     /* 毎回ユニークなクエリを付けてCDN・HTTPキャッシュを完全に素通りし、
        デプロイ直後でも即座に最新を取得する */
     const bustURL = new URL(e.request.url);
@@ -47,13 +56,13 @@ self.addEventListener("fetch", e => {
       Promise.race([
         fetch(bustURL, { cache: "no-store" }).then(res => {
           const copy = res.clone();
-          caches.open(CACHE).then(c => c.put("./index.html", copy));
+          caches.open(CACHE).then(c => c.put(key, copy));
           return res;
         }),
         new Promise(resolve => setTimeout(() => resolve(null), 2500))
       ])
-        .then(res => res || caches.match("./index.html", { ignoreSearch: true }))
-        .catch(() => caches.match("./index.html", { ignoreSearch: true }))
+        .then(res => res || caches.match(key, { ignoreSearch: true }))
+        .catch(() => caches.match(key, { ignoreSearch: true }))
     );
     return;
   }

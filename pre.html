@@ -189,6 +189,9 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
   <button class="cl" onclick="askClear()">新しい走行日にする</button>
 </div>
 <div id="expStat" class="stat"></div>
+<!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
+<div class="stat">版 v70</div>
+<button id="upd" class="getbtn" type="button">最新に更新する</button>
 
 </div>
 
@@ -616,6 +619,20 @@ function alertBig(title){
   ovl.classList.add('show');
 }
 /* 新しい走行日: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
+/* 更新が反映されないときの脱出口。保存済みのキャッシュを消してアプリごと
+   読み直す。記録(localStorage・写真)には触らない */
+function askUpdate(){
+  ask('アプリを最新に更新しますか?\n記録と写真は消えません。','はい、最新にする',async()=>{
+    try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(e){}
+    try{
+      const rs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map(r=>r.unregister()));
+    }catch(e){}
+    /* iframe の中なので、アプリ本体(親)ごと読み直す */
+    try{parent.location.reload();}catch(e){location.reload();}
+  });
+}
+document.getElementById('upd').addEventListener('click',askUpdate);
 function askClear(){ask('今の記録と写真をすべて消して\n新しい走行日にしますか?','はい、消して新しくする',async()=>{
   try{localStorage.removeItem(SKEY);}catch(e){}
   try{await clearPhotos();}catch(e){}

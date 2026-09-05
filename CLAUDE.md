@@ -10,8 +10,8 @@
    独立ファイル **pre.html** を iframe で表示する(#pre内)。pre.htmlは
    自己完結(独自CSS/JS)のイベント固有ページで、差し替えは pre.html を
    丸ごと置き換えるだけ。sw.js の ASSETS に ./pre.html を含めること。
-   pre.html はサブ文書なので sw.js のネットワーク優先(シェル)対象から
-   除外している(除外しないと index.html のキャッシュを上書きする)。
+   pre.html も index.html と同じくネットワーク優先で配信する。取得結果は
+   それぞれ自分のキー(./pre.html / ./index.html)に保存すること。
 2. **出走前チェック(#app)** = 乗車後〜コースイン直前の車内用。以下の
    「UIの絶対ルール」に従う巨大ボタン式。
 各画面から「≡ メニュー」でメニューへ戻る(状態は保持)。
@@ -54,10 +54,14 @@
 
 ## 技術ルール
 
-- **index.html か sw.js を変更したら、必ず sw.js の CACHE バージョンを
-  1つ上げる**(例: checklist-v21 → checklist-v22)。
-- sw.js はページ本体(navigate)をネットワーク優先(2.5秒タイムアウト、
-  圏外時はキャッシュ)、その他はキャッシュ優先。この方式を維持する。
+- **index.html・pre.html・sw.js のどれかを変更したら、必ず sw.js の CACHE
+  バージョンを1つ上げる**(例: checklist-v21 → checklist-v22)。
+  あわせて index.html と pre.html の「版 vNN」表示も同じ番号に直す
+  (更新が端末に届いているかを目で確かめるための表示)。
+- sw.js はページ本体(navigate=index.html と pre.html)をネットワーク優先
+  (2.5秒タイムアウト、圏外時はキャッシュ)、その他はキャッシュ優先。
+  この方式を維持する。install は1件ずつ入れて失敗を握りつぶす
+  (addAll だと1つ失敗しただけで install ごと失敗し、更新が止まるため)。
 - デプロイは GitHub Pages(main ブランチ)。ユーザーの指示により
   main へ直接プッシュしてよい。
 - 変更後はヘッドレスChromiumでレンダリング・遷移のスモークテストを行う。
