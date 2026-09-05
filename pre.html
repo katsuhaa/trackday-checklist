@@ -142,7 +142,6 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
   <ul class="ck">
     <li><span class="b"></span><span>牽引フックの装着</span></li>
     <li><span class="b"></span><span>3点式シートベルトの退避と4点式ベルトの準備</span></li>
-    <li><span class="b"></span><span>スマホブラケットの固定</span></li>
   </ul>
 </section>
 
@@ -152,8 +151,6 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <li><span class="b"></span><span>減衰を今日の設定にセットする（上の「今日の走行」で選んだ値）
       <span class="why">走行中に動かすと本どうしの比較が成立しません。</span></span></li>
     <li><span class="b"></span><span>空気圧を到着後に1回セットする → 以降さわらない。判断は必ず温間で行う</span></li>
-    <li><span class="b"></span><span><b>スマホの固定を絶対に変えない。</b>走行前に取り付けの写真を1枚撮る
-      <span class="why">向きが変わると振動・加速度の指標が本どうしで比較できなくなります。</span></span></li>
     <li><span class="b"></span><span><b>タイヤは一日中同じ面のまま</b>にする（前後ローテ・左右入れ替えをしない）</span></li>
     <li><span class="b"></span><span>ホイールナットを規定トルクで締める（前後・左右）</span></li>
     <li><span class="b"></span><span><b>パッド残量を目視して写真を撮る</b>（前後・左右）
@@ -256,6 +253,15 @@ const putPhoto=(id,blob)=>idbDo('readwrite',st=>st.put(blob,id));
 const getPhoto=id=>idbDo('readonly',st=>st.get(id));
 const delPhoto=id=>idbDo('readwrite',st=>st.delete(id));
 const clearPhotos=()=>idbDo('readwrite',st=>st.clear());
+/* 使わなくなった枠の写真は開くことができないので消す(保存領域を空ける) */
+function prunePhotos(keep){
+  return idb().then(db=>new Promise((res,rej)=>{
+    const t=db.transaction('photos','readwrite'), st=t.objectStore('photos');
+    const rq=st.getAllKeys();
+    rq.onsuccess=()=>{(rq.result||[]).forEach(k=>{if(keep.indexOf(k)<0)st.delete(k);});};
+    t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error);
+  }));
+}
 
 /* 長辺1600px・JPEGに縮小(元のままだと1枚数MBで端末の保存領域を圧迫するため) */
 async function shrink(file,max=1600,q=0.8){
@@ -294,9 +300,7 @@ document.getElementById('padBlock').innerHTML=
   seg('パッド残量（夕方）',PAD_LEVEL,true)+photoSlot('pad_pm','パッドの写真（夕方）','写真（夕方）')+
   '<div class="lbl">タイヤのショルダー</div>'+
   photoSlot('tire_am','タイヤの写真（朝）','写真（朝）')+
-  photoSlot('tire_pm','タイヤの写真（夕方）','写真（夕方）')+
-  '<div class="lbl">スマホの固定（走行前に1枚）</div>'+
-  photoSlot('phone','スマホ固定の写真','写真');
+  photoSlot('tire_pm','タイヤの写真（夕方）','写真（夕方）');
 const padBlock=document.getElementById('padBlock');
 
 function showPhoto(slot,blob){
@@ -329,6 +333,7 @@ document.querySelectorAll('.photo').forEach(slot=>{
   });
   getPhoto(id).then(b=>{if(b)showPhoto(slot,b);}).catch(()=>{});
 });
+prunePhotos([...document.querySelectorAll('.photo')].map(x=>x.dataset.pid)).catch(()=>{});
 
 /* ===== 現在地から コース・天候・気温 を入れる ===== */
 /* 最寄りのサーキットを名前で入れる。逆ジオコーディングだと地名しか返らず、
