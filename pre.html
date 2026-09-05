@@ -526,7 +526,17 @@ function dumpBlock(el){
   });
   return s;
 }
-async function exportText(){
+/* 書き出し: その日の記録を1ファイルにまとめる。
+   写真を別ファイルにすると1日に何個もできてしまうので、写真はこのHTMLの
+   中に埋め込んで「1日1ファイル」にする。ファイル名は日付だけで決まるので、
+   同じ日に何度保存しても同じ名前になる */
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toDataURL(blob){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r.readAsDataURL(blob);
+  });
+}
+function recordText(){
   let s='■ 走行前チェック\n';
   topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
   s+=dumpBlock(todaySet);
@@ -534,32 +544,44 @@ async function exportText(){
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n'+dumpBlock(el);
   });
-  const d=[...topFields()].find(f=>f.dataset.label==='日付');
-  const day=(d&&d.value)||new Date().toISOString().slice(0,10);
-  const fname='走行記録_'+day+'.txt';
-  const blob=new Blob([s],{type:'text/plain;charset=utf-8'});
+  return s;
+}
+async function exportText(){
+  /* 日付が空だと保存のたびに違う名前になりかねないので、今日の日付を入れる */
+  const dEl=byLabel('日付');
+  if(dEl&&!dEl.value){dEl.value=ymd(new Date());saveState();}
+  const day=(dEl&&dEl.value)||ymd(new Date());
+  const fname='走行記録_'+day+'.html';
 
-  /* テキストと保存済みの写真をまとめて共有シートに出す */
-  let files=[];
-  try{
-    files=[new File([blob],fname,{type:'text/plain'})];
-    for(const slot of document.querySelectorAll('.photo')){
-      const b=await getPhoto(slot.dataset.pid).catch(()=>null);
-      if(b)files.push(new File([b],'走行記録_'+day+'_'+slot.dataset.pid+'.jpg',{type:'image/jpeg'}));
-    }
-  }catch(e){files=[];}
+  let imgs='';
+  for(const slot of document.querySelectorAll('.photo')){
+    const b=await getPhoto(slot.dataset.pid).catch(()=>null);
+    if(!b)continue;
+    const url=await toDataURL(b).catch(()=>null);
+    if(!url)continue;
+    imgs+='<figure><figcaption>'+esc(slot.dataset.label.replace(/^写真 /,''))+'</figcaption>'+
+          '<img src="'+url+'" alt=""></figure>\n';
+  }
+  const html='<!DOCTYPE html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n'+
+    '<meta name="viewport" content="width=device-width, initial-scale=1">\n'+
+    '<title>走行記録 '+esc(day)+'</title>\n'+
+    '<style>body{font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;'+
+    'max-width:820px;margin:0 auto;padding:16px;color:#1f2430;line-height:1.6}'+
+    'h1{font-size:22px}h2{font-size:19px;margin-top:28px}'+
+    'pre{white-space:pre-wrap;font-family:inherit;font-size:16px;background:#f6f8fb;'+
+    'border:1px solid #e3e7ee;border-radius:10px;padding:14px}'+
+    'figure{margin:0 0 22px}figcaption{font-weight:700;margin-bottom:6px}'+
+    'img{width:100%;border-radius:10px;border:1px solid #e3e7ee;display:block}</style>\n'+
+    '</head>\n<body>\n<h1>走行記録 '+esc(day)+'</h1>\n<pre>'+esc(recordText())+'</pre>\n'+
+    (imgs?'<h2>写真</h2>\n'+imgs:'')+'</body>\n</html>\n';
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+
   /* iPhoneは共有シート経由で「ファイルに保存」できる。非対応環境はダウンロード */
   try{
-    if(files.length&&navigator.canShare&&navigator.canShare({files})){
-      await navigator.share({files:files,title:fname});
-      expStat.textContent='テキストと写真'+(files.length-1)+'枚を共有しました。';
-      return;
-    }
-    if(files.length&&navigator.canShare&&navigator.canShare({files:[files[0]]})){
-      await navigator.share({files:[files[0]],title:fname});
-      expStat.textContent=files.length>1
-        ?'テキストだけ共有しました。この端末では写真をまとめて共有できないため、写真は各項目から個別に保存してください。'
-        :'テキストを共有しました。';
+    const file=new File([blob],fname,{type:'text/html'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:fname});
+      expStat.textContent=fname+' を書き出しました。同じ日は同じ名前になるので、保存先で「置き換える」を選べば1日1ファイルのままです。';
       return;
     }
   }catch(e){expStat.textContent='';return;}
@@ -567,7 +589,7 @@ async function exportText(){
   const a=document.createElement('a');a.href=url;a.download=fname;
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  expStat.textContent=files.length>1?'テキストを保存しました。写真は各項目から個別に保存してください。':'テキストを保存しました。';
+  expStat.textContent=fname+' を保存しました。';
 }
 
 /* 確認は全画面の巨大2択(OS標準の小さいダイアログは使わない) */
