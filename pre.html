@@ -65,6 +65,9 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 .getbtn{width:100%;font:inherit;font-size:18px;font-weight:700;color:#fff;background:var(--blue);
   border:0;border-radius:12px;padding:17px 12px;min-height:62px;cursor:pointer;margin:12px 0 0}
 .stat{font-size:15px;color:var(--sub);margin:8px 0 0;white-space:pre-line;line-height:1.5}
+/* 滅多に使わない操作(更新)は控えめに。誤って押しても確認が入る */
+.quiet{width:100%;font:inherit;font-size:16px;font-weight:700;color:var(--sub);background:#fff;
+  border:1px solid #cfd6e0;border-radius:10px;padding:13px 10px;min-height:52px;cursor:pointer;margin:8px 0 0}
 /* 写真: 撮る/選ぶボタンとサムネイル */
 .photo{margin:6px 0 16px}
 .pbtn{display:block;width:100%;font-size:18px;font-weight:700;color:var(--blue);background:#fff;
@@ -84,7 +87,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 #ovl button{flex:1;font:inherit;font-size:24px;font-weight:800;border-radius:22px;cursor:pointer}
 #ovlYes{background:var(--red);color:#fff;border:0}
 #ovlNo{background:#fff;color:var(--ink);border:3px solid #c3ccda}
-@media print{body{background:#fff}.btns,#addStint,#ovl,.pbtn,.pdel,.getbtn{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
+@media print{body{background:#fff}.btns,#addStint,#ovl,.pbtn,.pdel,.getbtn,.quiet{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
 </style>
 </head>
 <body>
@@ -154,9 +157,10 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <li><span class="b"></span><span>空気圧をセットする（以降さわらない）</span></li>
     <li><span class="b"></span><span>タイヤは一日中同じ面のままにする</span></li>
     <li><span class="b"></span><span>ホイールナットを規定トルクで締める</span></li>
-    <li><span class="b"></span><span>パッド残量を目視して写真を撮る</span></li>
+    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（朝）</span></li>
+    <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（朝）</span></li>
     <li><span class="b"></span><span>車内の荷物をすべて降ろす</span></li>
-    <li><span class="b"></span><span>ロガーを充電して、記録できる状態にしておく</span></li>
+    <li><span class="b"></span><span>RaceChrono を記録できる状態にしておく（端末・ロガーを充電する）</span></li>
   </ul>
 </section>
 
@@ -175,11 +179,11 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
   <ul class="ck">
     <li><span class="b"></span><span>空気圧を標準設定に戻す</span></li>
     <li><span class="b"></span><span>減衰をすべて解放</span></li>
-    <li><span class="b"></span><span>3点式シートベルトを準備と4点式の片付け</span></li>
-    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（前・後／左右）</span></li>
+    <li><span class="b"></span><span>3点式シートベルトの復旧と4点式ベルトの片付け</span></li>
+    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（夕方）</span></li>
     <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（夕方）</span></li>
-    <li><span class="b"></span><span>.rcz を 01_ログ/（走行日）/ に入れる</span></li>
-    <li><span class="b"></span><span>メモをテキスト1本に統合する</span></li>
+    <li><span class="b"></span><span>「ファイルに保存」を押して、その日の記録を書き出す</span></li>
+    <li><span class="b"></span><span>RaceChrono の .rcz と書き出したファイルを <b class="dayfolder">01_ログ/</b> に入れる</span></li>
   </ul>
 </section>
 
@@ -190,8 +194,8 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v70</div>
-<button id="upd" class="getbtn" type="button">最新に更新する</button>
+<div class="stat">版 v71</div>
+<button id="upd" class="quiet" type="button">最新に更新する</button>
 
 </div>
 
@@ -397,6 +401,13 @@ async function fetchWeather(lat,lon,dateStr){
   throw new Error('データがありません');
 }
 function byLabel(l){return document.querySelector('.topf[data-label="'+l+'"]');}
+/* 書き出しファイルとログの置き場所。走行日から組み立てて画面に出す
+   (毎回どこに入れるか思い出さなくて済むように) */
+const LOGDIR='01_ログ/';
+function updateDayFolder(){
+  const d=byLabel('日付'), day=(d&&d.value)||ymd(new Date());
+  document.querySelectorAll('.dayfolder').forEach(el=>{el.textContent=LOGDIR+day+'/';});
+}
 const expStat=document.getElementById('expStat');
 const geoStat=document.getElementById('geoStat');
 function stat(t){geoStat.textContent=t;}
@@ -418,7 +429,7 @@ document.getElementById('geoBtn').addEventListener('click',()=>{
       msg.push('天候・気温を取得できませんでした（圏外の可能性）。手入力してください。');
     }
     msg.push('路温は気象データにないので手入力してください。');
-    saveState(); stat(msg.join('\n'));
+    saveState(); updateDayFolder(); stat(msg.join('\n'));
   },err=>{
     stat(err.code===1?'位置情報が許可されていません。設定で許可するか、手入力してください。'
                      :'現在地を取得できませんでした。手入力してください。');
@@ -438,12 +449,12 @@ function addStint(){
     <div class="sb">
       <div class="lbl">この本の減衰（最強から数える）</div>
       ${seg('前 戻し',FRONT,false)}${seg('後ろ 戻し',REAR,false)}
-      <div class="lbl">空気圧（走行前）1.50〜4.00・0.05刻み</div>
+      <div class="lbl">空気圧（走行前の実測）1.50〜4.00・0.05刻み</div>
       <div class="dials">${dials('走行前')}</div>
       <div class="hr"></div>
       <div class="lbl">走行時刻</div>
       <div class="time" data-label="時刻"><button onclick="stamp(this)">⏱ 時刻</button><span class="tv">—</span></div>
-      <div class="lbl">空気圧（走行直後）1.50〜4.00・0.05刻み</div>
+      <div class="lbl">空気圧（走行直後の実測）1.50〜4.00・0.05刻み</div>
       <div class="dials">${dials('走行後')}</div>
       <div class="lbl">メモ（前の本と比べてどうだったか）</div>
       <textarea data-label="メモ" placeholder="例：前の本より安定した／出口でまだ踏めない"></textarea>
@@ -556,7 +567,7 @@ function recordText(){
 async function exportText(){
   /* 日付が空だと保存のたびに違う名前になりかねないので、今日の日付を入れる */
   const dEl=byLabel('日付');
-  if(dEl&&!dEl.value){dEl.value=ymd(new Date());saveState();}
+  if(dEl&&!dEl.value){dEl.value=ymd(new Date());saveState();updateDayFolder();}
   const day=(dEl&&dEl.value)||ymd(new Date());
   const fname='走行記録_'+day+'.html';
 
@@ -645,6 +656,9 @@ const saved=readState();
 buildStints((saved&&saved.n)||3);
 restoreState(saved);
 document.querySelectorAll('.stint textarea, .topf').forEach(t=>t.addEventListener('input',saveState));
+const dateEl=byLabel('日付');
+if(dateEl){dateEl.addEventListener('input',updateDayFolder);dateEl.addEventListener('change',updateDayFolder);}
+updateDayFolder();
 ready=true;
 </script>
 </body>
