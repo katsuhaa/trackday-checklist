@@ -99,6 +99,14 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </header>
 
 <section class="card">
+  <h2>ブリーフ</h2>
+  <!-- Claude がチャットで書き換えてリポジトリに置いた brief.json を読み込む。
+       自動では上書きしない(現場で手で直した内容を消さないため) -->
+  <button id="briefBtn" class="getbtn" type="button">ブリーフを読み込む</button>
+  <div id="briefStat" class="stat"></div>
+</section>
+
+<section class="card">
   <h2>今日の走行</h2>
   <table class="kv">
     <tr><td>日付</td><td><input class="pin topf" type="date" data-label="日付"></td></tr>
@@ -194,7 +202,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v71</div>
+<div class="stat">版 v72</div>
 <button id="upd" class="quiet" type="button">最新に更新する</button>
 
 </div>
@@ -629,6 +637,50 @@ function alertBig(title){
   ovlAction=()=>{document.getElementById('ovlNo').style.display='';};
   ovl.classList.add('show');
 }
+/* ===== ブリーフの読み込み =====
+   brief.json(リポジトリ直下)を取り直して、日付・コース・タイヤ・減衰・空気圧・
+   今日の狙い・今日やらないこと に入れる。brief.json に無い項目は触らない。
+   すでに違う値が入っている欄があれば、全画面の2択で上書きを確認する */
+const briefStat=document.getElementById('briefStat');
+const BRIEF_TOP=['日付','コース','天候','気温','路温','タイヤ','今日の狙い','今日やらないこと'];
+const BRIEF_SEG=['前 戻し','後ろ 戻し'];
+function segOf(lbl){return todaySet.querySelector('.seg[data-label="'+lbl+'"]');}
+function dialOf(w){return todaySet.querySelector('select[data-label="空気圧 '+w+'"]');}
+function pv(v){const n=parseFloat(v);return isNaN(n)?'':n.toFixed(2);}
+/* 上書きになる欄(空でなく、値が違う)の名前を返す */
+function briefConflicts(b){
+  const out=[];
+  BRIEF_TOP.forEach(l=>{const f=byLabel(l);if(b[l]!=null&&f&&f.value.trim()&&f.value!==String(b[l]))out.push(l);});
+  BRIEF_SEG.forEach(l=>{const on=segOf(l)?.querySelector('button.on');if(b[l]!=null&&on&&on.textContent!==String(b[l]))out.push(l);});
+  if(b['空気圧'])WHEELS.forEach(w=>{const d=dialOf(w);if(b['空気圧'][w]!=null&&d&&d.value&&d.value!==pv(b['空気圧'][w]))out.push('空気圧 '+w);});
+  return out;
+}
+function applyBrief(b){
+  BRIEF_TOP.forEach(l=>{const f=byLabel(l);if(b[l]!=null&&f)f.value=String(b[l]);});
+  BRIEF_SEG.forEach(l=>{
+    const sg=segOf(l);if(b[l]==null||!sg)return;
+    const btn=[...sg.querySelectorAll('button')].find(x=>x.textContent===String(b[l]));
+    if(btn&&!btn.classList.contains('on'))pick(btn);
+  });
+  if(b['空気圧'])WHEELS.forEach(w=>{const d=dialOf(w);const v=pv(b['空気圧'][w]);if(d&&v&&[...d.options].some(o=>o.value===v))d.value=v;});
+  updateDayFolder();saveState();
+  briefStat.textContent=(b['作成']?b['作成']+' 作成の':'')+'ブリーフを入れました。';
+}
+async function loadBrief(){
+  briefStat.textContent='読み込み中…';
+  let b;
+  try{
+    const r=await fetch('./brief.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw 0;
+    b=await r.json();
+  }catch(e){briefStat.textContent='読み込めませんでした。電波のある所でもう一度押してください。';return;}
+  const c=briefConflicts(b);
+  if(!c.length){applyBrief(b);return;}
+  briefStat.textContent='';
+  ask('ブリーフで上書きしますか?\n'+c.join('・'),'はい、上書きする',()=>applyBrief(b));
+}
+document.getElementById('briefBtn').addEventListener('click',loadBrief);
+
 /* 新しい走行日: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
 /* 更新が反映されないときの脱出口。保存済みのキャッシュを消してアプリごと
    読み直す。記録(localStorage・写真)には触らない */

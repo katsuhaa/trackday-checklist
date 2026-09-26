@@ -1,7 +1,7 @@
 /* 出走前チェックリスト - オフラインキャッシュ
    更新時は CACHE のバージョン番号を上げてから再デプロイすること
    (pre.html の画面下に出る「版」の表示も同じ番号に合わせる) */
-const CACHE = "checklist-v71";
+const CACHE = "checklist-v72";
 const ASSETS = [
   "./",
   "./index.html",
@@ -39,6 +39,11 @@ self.addEventListener("fetch", e => {
   /* 外部への通信(気象API など)はSWを素通りさせる。
      ここで扱うと失敗時に index.html を返してしまい、JSONとして読めなくなる */
   if (new URL(e.request.url).origin !== self.location.origin) return;
+
+  /* brief.json は毎回サーバーから取る(Claude が書き換えるため)。
+     SWで扱うとキャッシュ優先になり古いブリーフが出る。失敗時に index.html を
+     返されると JSON として読めないので、ここも素通りさせる */
+  if (/brief\.json$/.test(new URL(e.request.url).pathname)) return;
 
   /* index.html と pre.html はどちらもネットワーク優先で最新を即反映する。
      pre.html は iframe のサブ文書だが同じく navigate なので同じ扱いにする。
