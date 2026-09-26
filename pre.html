@@ -64,6 +64,10 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 /* 走行を1本増やす。巨大ボタン(グローブ前提でも押せる大きさ) */
 #addStint{width:100%;font:inherit;font-size:19px;font-weight:700;color:var(--blue);background:#fff;
   border:2px dashed #b9c4d4;border-radius:13px;padding:18px 10px;min-height:64px;cursor:pointer;margin:4px 0 0}
+/* 最後の1本を消す。記録ごと消えるので確認を挟む。1本だけのときは出さない */
+#delStint{width:100%;font:inherit;font-size:17px;font-weight:700;color:#b91c1c;background:#fff;
+  border:2px solid #f0c4c4;border-radius:13px;padding:14px 10px;min-height:56px;cursor:pointer;margin:8px 0 0}
+#delStint[hidden]{display:none}
 /* 現在地から取得。巨大ボタン(屋外で片手で押す前提) */
 .getbtn{width:100%;font:inherit;font-size:18px;font-weight:700;color:#fff;background:var(--blue);
   border:0;border-radius:12px;padding:17px 12px;min-height:62px;cursor:pointer;margin:12px 0 0}
@@ -187,6 +191,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 
 <div id="stints"></div>
 <button id="addStint" type="button">＋ 走行を1本追加する</button>
+<button id="delStint" type="button">− 最後の1本を削除する</button>
 
 <section class="card">
   <h2>走行後</h2>
@@ -206,7 +211,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v75</div>
+<div class="stat">版 v76</div>
 
 </div>
 
@@ -505,10 +510,19 @@ function buildStints(count){
   for(let k=0;k<count;k++)addStint();
 }
 
+const delBtn=document.getElementById('delStint');
+function updateDelBtn(){delBtn.hidden=host.children.length<=1;}
+delBtn.addEventListener('click',()=>{
+  const n=host.children.length; if(n<=1)return;
+  ask(n+'本目を削除しますか?\n入力した記録も消えます。','はい、削除する',()=>{
+    host.lastElementChild.remove(); updateDelBtn(); saveState();
+  });
+});
 document.getElementById('addStint').addEventListener('click',()=>{
   const el=addStint();
   if(!el)return;
   el.querySelector('textarea').addEventListener('input',saveState);
+  updateDelBtn();
   saveState();
   el.scrollIntoView({behavior:'smooth',block:'start'});
 });
@@ -745,6 +759,7 @@ function askClear(){ask('今の記録と写真をすべて消して\n新しい�
    (復元中に保存が走ると、書き戻す前の空の状態で上書きしてしまう) */
 const saved=readState();
 buildStints((saved&&saved.n)||1);
+updateDelBtn();
 restoreState(saved);
 document.querySelectorAll('.stint textarea, .topf, textarea.pnote').forEach(t=>t.addEventListener('input',saveState));
 const dateEl=byLabel('日付');
