@@ -185,13 +185,18 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </section>
 
 <section class="card">
-  <h2>パッドとタイヤの写真</h2>
+  <h2>パッドとタイヤの写真（走行前）</h2>
   <div id="padBlock"></div>
 </section>
 
 <div id="stints"></div>
 <button id="addStint" type="button">＋ 走行を1本追加する</button>
 <button id="delStint" type="button">− 最後の1本を削除する</button>
+
+<section class="card">
+  <h2>パッドとタイヤの写真（走行後）</h2>
+  <div id="padBlock2"></div>
+</section>
 
 <section class="card">
   <h2>走行後</h2>
@@ -211,7 +216,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v76</div>
+<div class="stat">版 v77</div>
 
 </div>
 
@@ -310,18 +315,19 @@ function photoSlot(id,label,disp){
     '<label class="pbtn">＋ 写真を撮る／選ぶ<input type="file" accept="image/*" multiple hidden></label>'+
     '</div>';
 }
-function wheelSlots(when){
-  return '<div class="lbl">タイヤのトレッド（'+when+'）</div><div class="wheels">'+
-    WHEELS.map(w=>photoSlot('tire_'+(when==='朝'?'am':'pm')+'_'+w,'タイヤ '+w+'（'+when+'）',w)).join('')+'</div>';
+/* 走行前(キーは am)と走行後(キーは pm)。キー名は以前の朝/夕方のまま使う */
+function wheelSlots(when,key){
+  return '<div class="lbl">タイヤのトレッド</div><div class="wheels">'+
+    WHEELS.map(w=>photoSlot('tire_'+key+'_'+w,'タイヤ '+w+'（'+when+'）',w)).join('')+'</div>';
 }
-function padSlot(when,id){
-  return '<div class="lbl">パッド（'+when+'）</div>'+photoSlot(id,'パッドの写真（'+when+'）','写真');
+function padSlot(when,key){
+  return '<div class="lbl">パッド</div>'+photoSlot('pad_'+key,'パッドの写真（'+when+'）','写真');
 }
-document.getElementById('padBlock').innerHTML=
-  padSlot('朝','pad_am')+padSlot('夕方','pad_pm')+wheelSlots('朝')+wheelSlots('夕方')+
+document.getElementById('padBlock').innerHTML=padSlot('走行前','am')+wheelSlots('走行前','am');
+document.getElementById('padBlock2').innerHTML=padSlot('走行後','pm')+wheelSlots('走行後','pm')+
   /* コメントは全体で1つ。残量などの判定は写真を見て行うので、選択式は置かない */
   '<div class="lbl">コメント</div><textarea class="pnote" data-label="コメント" placeholder="例：FLパッド 段付きあり／RL内側に砂"></textarea>';
-const padBlock=document.getElementById('padBlock');
+const padBlock=document.getElementById('padBlock'), padBlock2=document.getElementById('padBlock2');
 
 /* 枠のサムネイルを保存内容から作り直す */
 async function renderSlot(slot){
@@ -553,6 +559,7 @@ function collectState(){
   const st={n:host.children.length,top:{},ck:[],seg:{},sel:{},time:{},memo:{}};
   topFields().forEach(f=>{if(f.value)st.top[f.dataset.label]=f.value;});
   collectBlock(padBlock,'P',st);
+  collectBlock(padBlock2,'P',st);
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
     collectBlock(el,si,st);
@@ -572,6 +579,7 @@ function restoreState(st){
   if(!st)return;
   topFields().forEach(f=>{const v=st.top&&st.top[f.dataset.label];if(v!=null)f.value=v;});
   restoreBlock(padBlock,'P',st);
+  restoreBlock(padBlock2,'P',st);
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
   document.querySelectorAll('.stint').forEach((el,si)=>{
@@ -607,10 +615,11 @@ function toDataURL(blob){
 function recordText(){
   let s='■ 走行前チェック\n';
   topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
-  s+='\n【パッドとタイヤの写真】\n'+dumpBlock(padBlock);
+  s+='\n【パッドとタイヤの写真（走行前）】\n'+dumpBlock(padBlock);
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n'+dumpBlock(el);
   });
+  s+='\n【パッドとタイヤの写真（走行後）】\n'+dumpBlock(padBlock2);
   return s;
 }
 async function exportText(){
