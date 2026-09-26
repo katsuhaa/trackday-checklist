@@ -48,6 +48,8 @@ strong{font-weight:800;}
 .menuBtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
   border:none;border-radius:26px;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.15);}
 #toPre{background:var(--navy);}
+#updBtn{flex:0 0 auto;min-height:60px;border-radius:16px;background:#fff;color:var(--navy);
+  border:2px solid rgba(102,112,122,.45);font-size:clamp(1.1rem,4.8vw,1.35rem);font-weight:700;}
 #toApp{background:var(--green);}
 .mBig{font-size:clamp(1.9rem,8.5vw,2.5rem);font-weight:800;}
 .mSub{font-size:1.05rem;font-weight:600;opacity:.9;padding:0 10px;text-align:center;line-height:1.4;}
@@ -156,7 +158,9 @@ body.advancing{background:#E4F3E9;}
     <span class="mBig">出走前チェック</span>
     <span class="mSub">乗車後〜コースイン直前(車内で使う)</span>
   </button>
-  <div id="ver">版 v73</div>
+  <div id="ver">版 v74</div>
+  <!-- 更新が届かないときの脱出口。記録(localStorage・写真)には触らない -->
+  <button id="updBtn" type="button">最新に更新する</button>
 </div>
 
 <!-- 出走前チェック(車内) -->
@@ -399,6 +403,12 @@ onTap($("toPre"),()=>showScreen("pre"));
 onTap($("toApp"),()=>showScreen("app"));
 onTap($("toMenuApp"),()=>showScreen("menu"));
 onTap($("toMenuPre"),()=>showScreen("menu"));
+/* 最新に更新する: 保存済みのキャッシュとSWを消してアプリごと読み直す */
+onTap($("updBtn"),()=>askConfirm("アプリを最新に更新しますか?\n記録と写真は消えません。","はい、最新にする",async()=>{
+  try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(e){}
+  try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}catch(e){}
+  location.reload();
+}));
 
 /* ===================== 共通 ===================== */
 let wakeLock=null;

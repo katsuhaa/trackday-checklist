@@ -65,18 +65,19 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 .getbtn{width:100%;font:inherit;font-size:18px;font-weight:700;color:#fff;background:var(--blue);
   border:0;border-radius:12px;padding:17px 12px;min-height:62px;cursor:pointer;margin:12px 0 0}
 .stat{font-size:15px;color:var(--sub);margin:8px 0 0;white-space:pre-line;line-height:1.5}
-/* 滅多に使わない操作(更新)は控えめに。誤って押しても確認が入る */
-.quiet{width:100%;font:inherit;font-size:16px;font-weight:700;color:var(--sub);background:#fff;
-  border:1px solid #cfd6e0;border-radius:10px;padding:13px 10px;min-height:52px;cursor:pointer;margin:8px 0 0}
 /* 写真: 撮る/選ぶボタンとサムネイル */
 .photo{margin:6px 0 16px}
 .pbtn{display:block;width:100%;font-size:18px;font-weight:700;color:var(--blue);background:#fff;
   border:2px dashed #b9c4d4;border-radius:12px;padding:16px 10px;min-height:60px;text-align:center;cursor:pointer}
-.pv{display:none;margin-top:8px}
-.pv.on{display:block}
-.pv img{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
-.pdel{width:100%;font:inherit;font-size:16px;font-weight:700;color:#b91c1c;background:#fff;
-  border:2px solid #f0c4c4;border-radius:10px;padding:12px;min-height:52px;margin-top:6px;cursor:pointer}
+/* 複数枚の写真: サムネイルを3列で並べる。タップで削除の確認 */
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}
+.thumbs:empty{display:none}
+.thumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block;cursor:pointer}
+/* タイヤ4輪は2×2で並べて縦の長さを抑える */
+.wheels{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wheels .photo{margin:0}
+.wheels .pbtn{font-size:14px;padding:12px 2px;min-height:52px;white-space:nowrap}
+.wheels .thumbs{grid-template-columns:repeat(2,1fr)}
 .btns{display:flex;gap:9px;margin:14px 0}
 .btns button{flex:1;font:inherit;font-size:17px;font-weight:700;border:0;border-radius:10px;padding:15px 10px;cursor:pointer}
 .exp{background:var(--blue);color:#fff}.pr{background:#374151;color:#fff}.cl{background:#eef1f6;color:#475569}
@@ -87,7 +88,6 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 #ovl button{flex:1;font:inherit;font-size:24px;font-weight:800;border-radius:22px;cursor:pointer}
 #ovlYes{background:var(--red);color:#fff;border:0}
 #ovlNo{background:#fff;color:var(--ink);border:3px solid #c3ccda}
-@media print{body{background:#fff}.btns,#addStint,#ovl,.pbtn,.pdel,.getbtn,.quiet{display:none}.seg button{border:1px solid #999}.seg button.on{outline:2px solid #000}}
 </style>
 </head>
 <body>
@@ -95,7 +95,6 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 
 <header>
   <h1>走行前チェック</h1>
-  <p>走行日ごとに<b>今日の狙い</b>と<b>今日やらないこと</b>を書き、各本の減衰・空気圧・時刻を記録する。</p>
 </header>
 
 <section class="card">
@@ -113,15 +112,11 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <tr><td>コース</td><td><input class="pin topf" data-label="コース" placeholder="例：袖ヶ浦フォレストレースウェイ"></td></tr>
     <tr><td>天候</td><td><input class="pin topf" data-label="天候" placeholder="例：晴れ／ドライ"></td></tr>
     <tr><td>気温</td><td><input class="pin topf" data-label="気温" placeholder="例：32℃"></td></tr>
-    <tr><td>路温</td><td><input class="pin topf" data-label="路温" placeholder="例：45℃"></td></tr>
     <tr><td>タイヤ</td><td><input class="pin topf" data-label="タイヤ" placeholder="例：PS5 205/40R17"></td></tr>
   </table>
   <!-- 現在地から コース(最寄りサーキット)・天候・気温 を入れる。路温は取得できない -->
   <button id="geoBtn" class="getbtn" type="button">現在地から コース・天候・気温 を取得する</button>
   <div id="geoStat" class="stat"></div>
-  <!-- 今日の減衰・空気圧は各本の記録と同じ選択式(ボタン/ダイヤル)で入れる -->
-  <div id="todaySet"></div>
-  <p class="mini">減衰・空気圧は到着後に1回セットし、以降は一日中さわらない。途中で動かすと本どうしの比較が成立しません。</p>
 </section>
 
 <section class="card">
@@ -147,36 +142,26 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
     <li><span class="b"></span><span>トルクレンチ＋ソケット</span></li>
     <li><span class="b"></span><span>ライセンス</span></li>
     <li><span class="b"></span><span>スタンプカード＋現金</span></li>
+    <li><span class="b"></span><span>GPS機・OBDアダプタ・スマホを充電して持つ</span></li>
   </ul>
 </section>
 
 <section class="card">
-  <h2>走行前の車両セッティング</h2>
+  <h2>到着後</h2>
   <ul class="ck">
-    <li><span class="b"></span><span>牽引フックの装着</span></li>
-    <li><span class="b"></span><span>3点式シートベルトの退避と4点式ベルトの準備</span></li>
-  </ul>
-</section>
-
-<section class="card">
-  <h2>走行前チェックリスト</h2>
-  <ul class="ck">
-    <li><span class="b"></span><span>減衰を今日の設定にセットする</span></li>
-    <li><span class="b"></span><span>空気圧をセットする（以降さわらない）</span></li>
-    <li><span class="b"></span><span>タイヤは一日中同じ面のままにする</span></li>
-    <li><span class="b"></span><span>ホイールナットを規定トルクで締める</span></li>
-    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（朝）</span></li>
-    <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（朝）</span></li>
     <li><span class="b"></span><span>車内の荷物をすべて降ろす</span></li>
-    <li><span class="b"></span><span>RaceChrono を記録できる状態にしておく（端末・ロガーを充電する）</span></li>
+    <li><span class="b"></span><span>牽引フックを装着する</span></li>
+    <li><span class="b"></span><span>3点式シートベルトを退避して4点式ベルトを準備する</span></li>
+    <li><span class="b"></span><span>減衰を1本目の設定にセットする</span></li>
+    <li><span class="b"></span><span>冷間の空気圧を1本目の設定に合わせる</span></li>
+    <li><span class="b"></span><span>ホイールナットを規定トルクで締める</span></li>
+    <li><span class="b"></span><span>GPS機を日陰の決まった位置に固定し、RaceChrono で衛星7個以上を確認する</span></li>
   </ul>
 </section>
 
 <section class="card">
   <h2>写真とパッド残量</h2>
-  <p class="mini">パッドの厚みは測れないので、<b>残量の段階と写真</b>で残す。朝と夕方の2枚を撮っておくと、その日の消費が後から追えます。</p>
   <div id="padBlock"></div>
-  <p class="mini">写真は<b>この端末の中だけ</b>に保存されます（サーバーには送りません）。長辺1600pxに縮小して持ちます。iOSがアプリのデータを消すことがあるため、大事な写真は写真アプリにも残してください。</p>
 </section>
 
 <div id="stints"></div>
@@ -186,24 +171,21 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
   <h2>走行後</h2>
   <ul class="ck">
     <li><span class="b"></span><span>空気圧を標準設定に戻す</span></li>
-    <li><span class="b"></span><span>減衰をすべて解放</span></li>
-    <li><span class="b"></span><span>3点式シートベルトの復旧と4点式ベルトの片付け</span></li>
-    <li><span class="b"></span><span>パッド残量を目視して写真を撮る（夕方）</span></li>
-    <li><span class="b"></span><span>タイヤのショルダーを写真で1枚撮る（夕方）</span></li>
+    <li><span class="b"></span><span>減衰をすべて解放する</span></li>
+    <li><span class="b"></span><span>3点式シートベルトを戻して4点式ベルトを片付ける</span></li>
+    <li><span class="b"></span><span>牽引フックを外す</span></li>
     <li><span class="b"></span><span>「ファイルに保存」を押して、その日の記録を書き出す</span></li>
-    <li><span class="b"></span><span>RaceChrono の .rcz と書き出したファイルを <b class="dayfolder">01_ログ/</b> に入れる</span></li>
+    <li><span class="b"></span><span>RaceChrono の .rcz と書き出したファイルを <b class="dayfolder">トラックデータ/</b> に入れる</span></li>
   </ul>
 </section>
 
 <div class="btns">
   <button class="exp" onclick="exportText()">ファイルに保存</button>
-  <button class="pr" onclick="print()">印刷</button>
   <button class="cl" onclick="askClear()">新しい走行日にする</button>
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v73</div>
-<button id="upd" class="quiet" type="button">最新に更新する</button>
+<div class="stat">版 v74</div>
 
 </div>
 
@@ -236,14 +218,6 @@ function pOptions(){let o='<option value="">—</option>';for(let i=150;i<=400;i
 function dial(lbl){return `<label class="dwrap"><span class="dlbl">${lbl}</span><select class="dial" data-label="${lbl}" onchange="saveState()">${pOptions()}</select></label>`;}
 function dials(prefix){return WHEELS.map(w=>dial(prefix+' '+w)).join('');}
 
-/* 今日の減衰・空気圧。各本の記録と同じ部品(ボタン/ダイヤル)を使って
-   手入力をなくす(値の書き方がぶれると本どうしで比較できないため) */
-document.getElementById('todaySet').innerHTML=
-  '<div class="lbl">減衰（最強から数える）</div>'+
-  seg('前 戻し',FRONT,false)+seg('後ろ 戻し',REAR,false)+
-  '<div class="lbl">空気圧（到着後に1回セット）1.50〜4.00・0.05刻み</div>'+
-  '<div class="dials">'+dials('空気圧')+'</div>';
-const todaySet=document.getElementById('todaySet');
 
 /* ===== 写真: 端末内(IndexedDB)にだけ保存する =====
    localStorage は約5MBで写真には足りないため IndexedDB を使う。
@@ -267,15 +241,9 @@ const putPhoto=(id,blob)=>idbDo('readwrite',st=>st.put(blob,id));
 const getPhoto=id=>idbDo('readonly',st=>st.get(id));
 const delPhoto=id=>idbDo('readwrite',st=>st.delete(id));
 const clearPhotos=()=>idbDo('readwrite',st=>st.clear());
-/* 使わなくなった枠の写真は開くことができないので消す(保存領域を空ける) */
-function prunePhotos(keep){
-  return idb().then(db=>new Promise((res,rej)=>{
-    const t=db.transaction('photos','readwrite'), st=t.objectStore('photos');
-    const rq=st.getAllKeys();
-    rq.onsuccess=()=>{(rq.result||[]).forEach(k=>{if(keep.indexOf(k)<0)st.delete(k);});};
-    t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); t.onabort=()=>rej(t.error);
-  }));
-}
+const allPhotoKeys=()=>idbDo('readonly',st=>st.getAllKeys()).then(k=>k||[]);
+/* 1つの枠(gid)に何枚でも入れる。キーは gid#時刻。以前の1枚だけの形(キー=gid)も同じ枠に出す */
+const inGroup=(k,gid)=>k===gid||String(k).indexOf(gid+'#')===0;
 
 /* 長辺1600px・JPEGに縮小(元のままだと1枚数MBで端末の保存領域を圧迫するため) */
 async function shrink(file,max=1600,q=0.8){
@@ -300,54 +268,60 @@ async function shrink(file,max=1600,q=0.8){
   return new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('画像を変換できませんでした')),'image/jpeg',q));
 }
 
-/* 写真1枚ぶんの部品(撮る/選ぶ・サムネイル・削除) */
+/* 写真の枠(何枚でも入る): 撮る/選ぶボタンとサムネイル。サムネイルをタップで削除 */
 function photoSlot(id,label,disp){
-  return '<div class="photo" data-pid="'+id+'" data-label="写真 '+label+'">'+
+  return '<div class="photo" data-gid="'+id+'" data-n="0" data-label="写真 '+label+'">'+
     '<div class="dlbl">'+(disp||label)+'</div>'+
-    '<label class="pbtn">写真を撮る／選ぶ<input type="file" accept="image/*" hidden></label>'+
-    '<div class="pv"><img alt=""><button type="button" class="pdel">この写真を削除する</button></div>'+
+    '<div class="thumbs"></div>'+
+    '<label class="pbtn">＋ 写真を撮る／選ぶ<input type="file" accept="image/*" multiple hidden></label>'+
     '</div>';
+}
+function wheelSlots(when){
+  return '<div class="lbl">タイヤのトレッド（'+when+'）</div><div class="wheels">'+
+    WHEELS.map(w=>photoSlot('tire_'+(when==='朝'?'am':'pm')+'_'+w,'タイヤ '+w+'（'+when+'）',w)).join('')+'</div>';
 }
 const PAD_LEVEL=[['十分','g'],['半分','w'],['少ない','b'],['要交換','b']];
 document.getElementById('padBlock').innerHTML=
   seg('パッド残量（朝）',PAD_LEVEL,true)+photoSlot('pad_am','パッドの写真（朝）','写真（朝）')+
   seg('パッド残量（夕方）',PAD_LEVEL,true)+photoSlot('pad_pm','パッドの写真（夕方）','写真（夕方）')+
-  '<div class="lbl">タイヤのショルダー</div>'+
-  photoSlot('tire_am','タイヤの写真（朝）','写真（朝）')+
-  photoSlot('tire_pm','タイヤの写真（夕方）','写真（夕方）');
+  wheelSlots('朝')+wheelSlots('夕方');
 const padBlock=document.getElementById('padBlock');
 
-function showPhoto(slot,blob){
-  const pv=slot.querySelector('.pv'), img=pv.querySelector('img');
-  const old=img.getAttribute('src'); if(old)URL.revokeObjectURL(old);
-  if(blob){img.src=URL.createObjectURL(blob);pv.classList.add('on');}
-  else{img.removeAttribute('src');pv.classList.remove('on');}
+/* 枠のサムネイルを保存内容から作り直す */
+async function renderSlot(slot){
+  const gid=slot.dataset.gid, box=slot.querySelector('.thumbs');
+  box.querySelectorAll('img').forEach(im=>URL.revokeObjectURL(im.src));
+  box.textContent='';
+  const keys=(await allPhotoKeys().catch(()=>[])).filter(k=>inGroup(k,gid)).sort();
+  for(const k of keys){
+    const b=await getPhoto(k).catch(()=>null); if(!b)continue;
+    const im=document.createElement('img'); im.src=URL.createObjectURL(b); im.alt='';
+    im.addEventListener('click',()=>ask('この写真を削除しますか?','はい、削除する',async()=>{
+      try{await delPhoto(k);}catch(e){}
+      renderSlot(slot);
+    }));
+    box.appendChild(im);
+  }
+  slot.dataset.n=box.children.length;
 }
 document.querySelectorAll('.photo').forEach(slot=>{
-  const id=slot.dataset.pid;
+  const gid=slot.dataset.gid;
   slot.querySelector('input[type=file]').addEventListener('change',async ev=>{
-    const f=ev.target.files&&ev.target.files[0]; ev.target.value='';
-    if(!f)return;
-    const btn=slot.querySelector('.pbtn'); const label=btn.childNodes[0];
+    const fs=[...(ev.target.files||[])]; ev.target.value='';
+    if(!fs.length)return;
+    const label=slot.querySelector('.pbtn').childNodes[0];
     label.nodeValue='保存しています…';
-    try{
-      const small=await shrink(f);
-      await putPhoto(id,small);
-      showPhoto(slot,small);
-    }catch(e){
-      alertBig('写真を保存できませんでした。もう一度試してください');
+    let ng=0;
+    for(const f of fs){
+      try{await putPhoto(gid+'#'+Date.now()+'_'+Math.random().toString(36).slice(2,6),await shrink(f));}
+      catch(e){ng++;}
     }
-    label.nodeValue='写真を撮る／選ぶ';
+    await renderSlot(slot);
+    label.nodeValue='＋ 写真を撮る／選ぶ';
+    if(ng)alertBig(ng+'枚の写真を保存できませんでした。もう一度試してください');
   });
-  slot.querySelector('.pdel').addEventListener('click',()=>{
-    ask('この写真を削除しますか?','はい、削除する',async()=>{
-      try{await delPhoto(id);}catch(e){}
-      showPhoto(slot,null);
-    });
-  });
-  getPhoto(id).then(b=>{if(b)showPhoto(slot,b);}).catch(()=>{});
+  renderSlot(slot);
 });
-prunePhotos([...document.querySelectorAll('.photo')].map(x=>x.dataset.pid)).catch(()=>{});
 
 /* ===== 現在地から コース・天候・気温 を入れる ===== */
 /* 最寄りのサーキットを名前で入れる。逆ジオコーディングだと地名しか返らず、
@@ -411,9 +385,9 @@ async function fetchWeather(lat,lon,dateStr){
 function byLabel(l){return document.querySelector('.topf[data-label="'+l+'"]');}
 /* 書き出しファイルとログの置き場所。走行日から組み立てて画面に出す
    (毎回どこに入れるか思い出さなくて済むように) */
-const LOGDIR='01_ログ/';
+const LOGDIR='トラックデータ/';
 function updateDayFolder(){
-  const d=byLabel('日付'), day=(d&&d.value)||ymd(new Date());
+  const d=byLabel('日付'), day=((d&&d.value)||ymd(new Date())).replace(/-/g,'');
   document.querySelectorAll('.dayfolder').forEach(el=>{el.textContent=LOGDIR+day+'/';});
 }
 const expStat=document.getElementById('expStat');
@@ -436,7 +410,6 @@ document.getElementById('geoBtn').addEventListener('click',()=>{
     }catch(e){
       msg.push('天候・気温を取得できませんでした（圏外の可能性）。手入力してください。');
     }
-    msg.push('路温は気象データにないので手入力してください。');
     saveState(); updateDayFolder(); stat(msg.join('\n'));
   },err=>{
     stat(err.code===1?'位置情報が許可されていません。設定で許可するか、手入力してください。'
@@ -508,7 +481,6 @@ function restoreBlock(el,key,st){
 function collectState(){
   const st={n:host.children.length,top:{},ck:[],seg:{},sel:{},time:{},memo:{}};
   topFields().forEach(f=>{if(f.value)st.top[f.dataset.label]=f.value;});
-  collectBlock(todaySet,'T',st);
   collectBlock(padBlock,'P',st);
   document.querySelectorAll('ul.ck li').forEach((li,idx)=>{if(li.classList.contains('on'))st.ck.push(idx);});
   document.querySelectorAll('.stint').forEach((el,si)=>{
@@ -528,7 +500,6 @@ function readState(){
 function restoreState(st){
   if(!st)return;
   topFields().forEach(f=>{const v=st.top&&st.top[f.dataset.label];if(v!=null)f.value=v;});
-  restoreBlock(todaySet,'T',st);
   restoreBlock(padBlock,'P',st);
   const lis=document.querySelectorAll('ul.ck li');
   (st.ck||[]).forEach(idx=>{if(lis[idx])lis[idx].classList.add('on');});
@@ -543,7 +514,7 @@ function dumpBlock(el){
   let s='';
   el.querySelectorAll('[data-label]').forEach(f=>{
     let v='—';
-    if(f.classList.contains('photo'))v=f.querySelector('.pv img').getAttribute('src')?'あり':'なし';
+    if(f.classList.contains('photo'))v=(+f.dataset.n)?f.dataset.n+'枚':'なし';
     else if(f.classList.contains('seg'))v=f.querySelector('button.on')?.textContent||'—';
     else if(f.classList.contains('time'))v=f.querySelector('.tv').textContent||'—';
     else if(f.tagName==='SELECT')v=f.value||'—';
@@ -565,7 +536,6 @@ function toDataURL(blob){
 function recordText(){
   let s='■ 走行前チェック\n';
   topFields().forEach(f=>{s+='  '+f.dataset.label+'：'+(f.value.trim()||'—')+'\n';});
-  s+=dumpBlock(todaySet);
   s+='\n【写真とパッド残量】\n'+dumpBlock(padBlock);
   document.querySelectorAll('.stint').forEach(el=>{
     s+='\n【'+el.dataset.t+'】\n'+dumpBlock(el);
@@ -579,15 +549,19 @@ async function exportText(){
   const day=(dEl&&dEl.value)||ymd(new Date());
   const fname='走行記録_'+day+'.html';
 
+  /* 写真は枠ごとに全部入れる。どの枠にも属さない写真(以前の形の残り)も落とさない */
   let imgs='';
+  const keys=(await allPhotoKeys().catch(()=>[])).sort(), used=new Set();
+  const addImg=async(k,cap)=>{
+    const b=await getPhoto(k).catch(()=>null); if(!b)return;
+    const url=await toDataURL(b).catch(()=>null); if(!url)return;
+    imgs+='<figure><figcaption>'+esc(cap)+'</figcaption><img src="'+url+'" alt=""></figure>\n';
+  };
   for(const slot of document.querySelectorAll('.photo')){
-    const b=await getPhoto(slot.dataset.pid).catch(()=>null);
-    if(!b)continue;
-    const url=await toDataURL(b).catch(()=>null);
-    if(!url)continue;
-    imgs+='<figure><figcaption>'+esc(slot.dataset.label.replace(/^写真 /,''))+'</figcaption>'+
-          '<img src="'+url+'" alt=""></figure>\n';
+    const ks=keys.filter(k=>inGroup(k,slot.dataset.gid)), cap=slot.dataset.label.replace(/^写真 /,'');
+    for(let n=0;n<ks.length;n++){used.add(ks[n]);await addImg(ks[n],cap+(ks.length>1?' '+(n+1)+'枚目':''));}
   }
+  for(const k of keys)if(!used.has(k))await addImg(k,String(k));
   const html='<!DOCTYPE html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n'+
     '<meta name="viewport" content="width=device-width, initial-scale=1">\n'+
     '<title>走行記録 '+esc(day)+'</title>\n'+
@@ -638,21 +612,22 @@ function alertBig(title){
   ovl.classList.add('show');
 }
 /* ===== ブリーフの読み込み =====
-   brief.json(リポジトリ直下)を取り直して、日付・コース・タイヤ・減衰・空気圧・
-   今日の狙い・今日やらないこと に入れる。brief.json に無い項目は触らない。
+   brief.json(リポジトリ直下)を取り直して、日付・コース・タイヤ・今日の狙い・
+   今日やらないこと と、1本目のカードの減衰・空気圧(走行前) に入れる。brief.json に無い項目は触らない。
    すでに違う値が入っている欄があれば、全画面の2択で上書きを確認する */
 const briefStat=document.getElementById('briefStat');
-const BRIEF_TOP=['日付','コース','天候','気温','路温','タイヤ','今日の狙い','今日やらないこと'];
+const BRIEF_TOP=['日付','コース','天候','気温','タイヤ','今日の狙い','今日やらないこと'];
 const BRIEF_SEG=['前 戻し','後ろ 戻し'];
-function segOf(lbl){return todaySet.querySelector('.seg[data-label="'+lbl+'"]');}
-function dialOf(w){return todaySet.querySelector('select[data-label="空気圧 '+w+'"]');}
+function stint1(){return host.children[0];}
+function segOf(lbl){return stint1()?.querySelector('.seg[data-label="'+lbl+'"]');}
+function dialOf(w){return stint1()?.querySelector('select[data-label="走行前 '+w+'"]');}
 function pv(v){const n=parseFloat(v);return isNaN(n)?'':n.toFixed(2);}
 /* 上書きになる欄(空でなく、値が違う)の名前を返す */
 function briefConflicts(b){
   const out=[];
   BRIEF_TOP.forEach(l=>{const f=byLabel(l);if(b[l]!=null&&f&&f.value.trim()&&f.value!==String(b[l]))out.push(l);});
-  BRIEF_SEG.forEach(l=>{const on=segOf(l)?.querySelector('button.on');if(b[l]!=null&&on&&on.textContent!==String(b[l]))out.push(l);});
-  if(b['空気圧'])WHEELS.forEach(w=>{const d=dialOf(w);if(b['空気圧'][w]!=null&&d&&d.value&&d.value!==pv(b['空気圧'][w]))out.push('空気圧 '+w);});
+  BRIEF_SEG.forEach(l=>{const on=segOf(l)?.querySelector('button.on');if(b[l]!=null&&on&&on.textContent!==String(b[l]))out.push('1本目 '+l);});
+  if(b['空気圧'])WHEELS.forEach(w=>{const d=dialOf(w);if(b['空気圧'][w]!=null&&d&&d.value&&d.value!==pv(b['空気圧'][w]))out.push('1本目 走行前 '+w);});
   return out;
 }
 function applyBrief(b){
@@ -703,20 +678,6 @@ async function loadBrief(){
 document.getElementById('briefBtn').addEventListener('click',loadBrief);
 
 /* 新しい走行日: 保存データを消して初期状態に戻す(キーはSKEYで一元管理) */
-/* 更新が反映されないときの脱出口。保存済みのキャッシュを消してアプリごと
-   読み直す。記録(localStorage・写真)には触らない */
-function askUpdate(){
-  ask('アプリを最新に更新しますか?\n記録と写真は消えません。','はい、最新にする',async()=>{
-    try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(e){}
-    try{
-      const rs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(rs.map(r=>r.unregister()));
-    }catch(e){}
-    /* iframe の中なので、アプリ本体(親)ごと読み直す */
-    try{parent.location.reload();}catch(e){location.reload();}
-  });
-}
-document.getElementById('upd').addEventListener('click',askUpdate);
 function askClear(){ask('今の記録と写真をすべて消して\n新しい走行日にしますか?','はい、消して新しくする',async()=>{
   try{localStorage.removeItem(SKEY);}catch(e){}
   try{await clearPhotos();}catch(e){}
@@ -726,7 +687,7 @@ function askClear(){ask('今の記録と写真をすべて消して\n新しい�
 /* 保存済みの本数でカードを作ってから復元し、そのあと保存を有効化
    (復元中に保存が走ると、書き戻す前の空の状態で上書きしてしまう) */
 const saved=readState();
-buildStints((saved&&saved.n)||3);
+buildStints((saved&&saved.n)||1);
 restoreState(saved);
 document.querySelectorAll('.stint textarea, .topf').forEach(t=>t.addEventListener('input',saveState));
 const dateEl=byLabel('日付');
