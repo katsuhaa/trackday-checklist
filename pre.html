@@ -202,7 +202,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v72</div>
+<div class="stat">版 v73</div>
 <button id="upd" class="quiet" type="button">最新に更新する</button>
 
 </div>
@@ -666,6 +666,15 @@ function applyBrief(b){
   updateDayFolder();saveState();
   briefStat.textContent=(b['作成']?b['作成']+' 作成の':'')+'ブリーフを入れました。';
 }
+/* 別の走行日のブリーフなら、前の走行日の記録(各本・チェック・写真)が残って
+   混ざらないように、「新しい走行日にする」と同じ手順で全部消してから入れる。
+   消したあとページを読み直すので、ブリーフは BKEY に預けて読み直し後に入れる */
+const BKEY='predrive_pending_brief';
+function hasRecord(){
+  const st=readState();if(!st)return false;
+  return Object.keys(st.top||{}).length||Object.keys(st.seg||{}).length||Object.keys(st.sel||{}).length
+    ||(st.ck||[]).length||Object.keys(st.time||{}).length||Object.keys(st.memo||{}).length;
+}
 async function loadBrief(){
   briefStat.textContent='読み込み中…';
   let b;
@@ -674,6 +683,18 @@ async function loadBrief(){
     if(!r.ok)throw 0;
     b=await r.json();
   }catch(e){briefStat.textContent='読み込めませんでした。電波のある所でもう一度押してください。';return;}
+  const cur=(byLabel('日付')||{}).value||'';
+  if(b['日付']&&cur!==b['日付']&&hasRecord()){
+    briefStat.textContent='';
+    ask((cur?cur+' の':'前の')+'記録と写真をすべて消して\n'+b['日付']+' の走行日として\nブリーフを読み込みますか?\n(書き出していない記録は戻せません)',
+        'はい、消して読み込む',async()=>{
+      try{localStorage.setItem(BKEY,JSON.stringify(b));}catch(e){}
+      try{localStorage.removeItem(SKEY);}catch(e){}
+      try{await clearPhotos();}catch(e){}
+      location.reload();
+    });
+    return;
+  }
   const c=briefConflicts(b);
   if(!c.length){applyBrief(b);return;}
   briefStat.textContent='';
@@ -712,6 +733,8 @@ const dateEl=byLabel('日付');
 if(dateEl){dateEl.addEventListener('input',updateDayFolder);dateEl.addEventListener('change',updateDayFolder);}
 updateDayFolder();
 ready=true;
+/* 新しい走行日にしてから読み直した場合は、預けておいたブリーフをここで入れる */
+try{const pb=localStorage.getItem(BKEY);if(pb){localStorage.removeItem(BKEY);applyBrief(JSON.parse(pb));}}catch(e){}
 </script>
 </body>
 </html>
