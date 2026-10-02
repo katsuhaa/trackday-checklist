@@ -56,7 +56,8 @@ ul.ck li.on .why{color:#c2c8d0}
 .time button{font:inherit;font-size:17px;background:#374151;color:#fff;border:0;border-radius:9px;padding:11px 15px;min-height:52px;cursor:pointer}
 .tv{font-weight:800;font-size:22px}
 textarea{width:100%;min-height:64px;font:inherit;font-size:17px;padding:9px;border:1px solid #cfd6e0;border-radius:8px;margin-top:4px}
-textarea.big{min-height:82px}
+/* 今日の狙い・今日やらないこと: 大きい文字で、中身の行数に合わせて高さを伸ばす(スクロールさせない) */
+textarea.big{min-height:82px;font-size:21px;line-height:1.55;font-weight:600;overflow:hidden;resize:none}
 input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #cfd6e0;border-radius:8px}
 .hr{height:1px;background:var(--line);margin:13px -14px}
 .tech{font-size:16px;color:var(--sub);line-height:1.7}
@@ -216,7 +217,7 @@ input.pin{width:100%;font:inherit;font-size:18px;padding:11px;border:1px solid #
 </div>
 <div id="expStat" class="stat"></div>
 <!-- 版が古いままかを目で確かめられるようにする(sw.js の CACHE と同じ番号) -->
-<div class="stat">版 v77</div>
+<div class="stat">版 v78</div>
 
 </div>
 
@@ -718,7 +719,7 @@ function applyBrief(b){
     if(btn&&!btn.classList.contains('on'))pick(btn);
   });
   if(b['空気圧'])WHEELS.forEach(w=>{const d=dialOf(w);const v=pv(b['空気圧'][w]);if(d&&v&&[...d.options].some(o=>o.value===v))d.value=v;});
-  updateDayFolder();saveState();
+  updateDayFolder();saveState();if(typeof growAll==='function')growAll();
   briefStat.textContent=(b['作成']?b['作成']+' 作成の':'')+'ブリーフを入れました。';
 }
 /* 別の走行日のブリーフなら、前の走行日の記録(各本・チェック・写真)が残って
@@ -774,6 +775,11 @@ document.querySelectorAll('.stint textarea, .topf, textarea.pnote').forEach(t=>t
 const dateEl=byLabel('日付');
 if(dateEl){dateEl.addEventListener('input',updateDayFolder);dateEl.addEventListener('change',updateDayFolder);}
 updateDayFolder();
+/* 大きい欄は中身に合わせて高さを伸ばす(入力中・復元後・ブリーフ読込後) */
+function growAll(){document.querySelectorAll('textarea.big').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';});}
+document.querySelectorAll('textarea.big').forEach(t=>t.addEventListener('input',growAll));
+window.addEventListener('resize',growAll);
+growAll();
 ready=true;
 /* 新しい走行日にしてから読み直した場合は、預けておいたブリーフをここで入れる */
 try{const pb=localStorage.getItem(BKEY);if(pb){localStorage.removeItem(BKEY);applyBrief(JSON.parse(pb));}}catch(e){}
